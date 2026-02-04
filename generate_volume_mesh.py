@@ -2,11 +2,13 @@ import numpy as np
 import pyvista as pv
 from tetgen import TetGen
 import os
+import matplotlib.pyplot as plt
 
 if __name__=="__main__":
     template_dir = "../data/template_LV/LV/"
     save_dir = "meshes/"
-    face_names = ['wall','av','mv']
+    face_names = ["wall","av","mv"]
+    overwrite = False
 
     n_meshes = 10  
 
@@ -25,10 +27,10 @@ if __name__=="__main__":
         os.makedirs(os.path.join(save_dir,mesh_dir),exist_ok=True)
         print(vol_fn)
 
-        if not os.path.exists(vol_fn): # If volume mesh exists, assumes all others do, too
+        if not os.path.exists(vol_fn) or overwrite: # If volume mesh exists, assumes all others do, too
             # Generate volume mesh
             tetgen = TetGen(surf_mesh)
-            tetgen.tetrahedralize(switches="pqY")
+            tetgen.tetrahedralize(switches="pq1.Y")
             vol_mesh = tetgen.grid
 
             # Save volume mesh
@@ -62,3 +64,12 @@ if __name__=="__main__":
     pl.camera.zoom(1.5)
     pl.show(screenshot="vol_meshes.png")
 
+    # Plot cell quality
+    fig,ax = plt.subplots(1,2,figsize=(8,3))
+    ax[0].hist(vol_mesh.compute_cell_quality("volume")["CellQuality"],bins=50,range=(0,1e-6))
+    ax[0].set_title("volume")
+    ax[0].set_xlabel("# cells")
+    ax[1].hist(vol_mesh.compute_cell_quality("aspect_ratio")["CellQuality"],bins=50,range=(0,5))
+    ax[1].set_title("aspect_ratio")
+    ax[1].set_xlabel("# cells")
+    fig.savefig("mesh_quality.png",bbox_inches="tight")
