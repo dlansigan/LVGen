@@ -1,6 +1,6 @@
 import os
 import sys
-sys.path.append("/sv/NoisyPipe/interp-src")
+sys.path.append("interp-src")
 import numpy as np
 import matplotlib.pyplot as plt
 import collections
@@ -206,7 +206,7 @@ def write_motion(meshes,  interp_type, start_point, intpl_num, output_dir, num_c
                 io_utils.write_vtk_polydata(poly, fn_debug)
         for i in node_id_index:
             disp = displacements[i, :, :] * scale
-            f.write('{}\n'.format(node_ids[i]+1))
+            f.write('{}\n'.format(node_ids[i]))
             for j in range(total_steps):
                 f.write('{} {} {}\n'.format(disp[0,j], disp[1,j],disp[2,j]))
         f.close()

@@ -1286,6 +1286,29 @@ def threshold_polydata(poly, attr, threshold):
     surf_filter.SetInputData(surface_thresh.GetOutput())
     surf_filter.Update()
     return surf_filter.GetOutput()
+
+def threshold_polydata_volume(poly, attr, threshold):
+    """
+    Get the polydata after thresholding based on the input attribute
+
+    Args:
+        poly: vtk PolyData to apply threshold
+        atrr: attribute of the cell array
+        threshold: (min, max) 
+    Returns:
+
+        output: resulted vtk PolyData
+    """
+    surface_thresh = vtk.vtkThreshold()
+    surface_thresh.SetInputData(poly)
+    surface_thresh.SetInputArrayToProcess(0,0,0,1,attr)
+    surface_thresh.ThresholdBetween(*threshold) # For some reason, this has to be used for volume mesh??
+    surface_thresh.SetThresholdFunction(vtk.vtkThreshold.THRESHOLD_BETWEEN)
+    surface_thresh.Update()
+    surf_filter = vtk.vtkDataSetSurfaceFilter()
+    surf_filter.SetInputData(surface_thresh.GetOutput())
+    surf_filter.Update()
+    return surf_filter.GetOutput()
 def convert_polydata_to_image_data(poly, ref_im, reverse=True):
     """
     Convert the vtk polydata to imagedata 
