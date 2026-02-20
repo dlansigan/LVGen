@@ -1,0 +1,256 @@
+{
+  "simulation_parameters": {
+    "coupled_simulation": true,
+    "number_of_time_pts": 512,
+    "external_step_size": 0.005388,
+    "output_all_cycles": true,
+    "output_variable_based": true,
+    "steady_initial": false
+  },
+  "boundary_conditions": [],
+  "external_solver_coupling_blocks": [
+      {
+          "name": "LPN_inlet",
+          "type": "FLOW",
+          "location": "inlet",
+          "connected_block": "DUMMY_AV",
+          "periodic": false,
+          "values": {
+              "t": [0.0, 1.0],
+              "Q": [1.0, 1.0]
+          }
+      },
+      {
+          "name": "LPN_outlet",
+          "type": "FLOW",
+          "location": "outlet",
+          "connected_block": "DUMMY_MV",
+          "periodic": false,
+          "values": {
+              "t": [0.0, 1.0],
+              "Q": [1.0, 1.0]
+          }
+      }
+  ],
+  "junctions": [
+    {
+      "inlet_blocks": [
+        "VEN_PUL"
+      ],
+      "junction_name": "J0",
+      "junction_type": "NORMAL_JUNCTION",
+      "outlet_blocks": [
+        "LA"
+      ]
+    },
+    {
+      "inlet_blocks": [
+        "ART_PUL"
+      ],
+      "junction_name": "J1",
+      "junction_type": "NORMAL_JUNCTION",
+      "outlet_blocks": [
+        "VEN_PUL"
+      ]
+    },
+    {
+      "inlet_blocks": [
+        "VEN_SYS"
+      ],
+      "junction_name": "J2",
+      "junction_type": "NORMAL_JUNCTION",
+      "outlet_blocks": [
+        "RA"
+      ]
+    },
+    {
+      "inlet_blocks": [
+        "ART_SYS"
+      ],
+      "junction_name": "J3",
+      "junction_type": "NORMAL_JUNCTION",
+      "outlet_blocks": [
+        "VEN_SYS"
+      ]
+    }
+  ],
+  "vessels": [
+    {
+      "vessel_id": 1,
+      "vessel_length": 10.0,
+      "vessel_name": "VEN_PUL",
+      "zero_d_element_type": "BloodVesselCRL",
+      "zero_d_element_values": {
+        "C": 16.0,
+        "L": 0.0005,
+        "R_poiseuille": 0.035,
+        "stenosis_coefficient": 0
+      }
+    },
+    {
+      "vessel_id": 2,
+      "vessel_length": 10.0,
+      "vessel_name": "ART_PUL",
+      "zero_d_element_type": "BloodVesselCRL",
+      "zero_d_element_values": {
+        "C": 10.0,
+        "L": 0.0005,
+        "R_poiseuille": 0.032,
+        "stenosis_coefficient": 0
+      }
+    },
+    {
+      "vessel_id": 3,
+      "vessel_length": 10.0,
+      "vessel_name": "VEN_SYS",
+      "zero_d_element_type": "BloodVesselCRL",
+      "zero_d_element_values": {
+        "C": 60.0,
+        "L": 0.0005,
+        "R_poiseuille": 0.32,
+        "stenosis_coefficient": 0
+      }
+    },
+    {
+      "vessel_id": 4,
+      "vessel_length": 10.0,
+      "vessel_name": "ART_SYS",
+      "zero_d_element_type": "BloodVesselCRL",
+      "zero_d_element_values": {
+        "C": 1.2,
+        "L": 0.005,
+        "R_poiseuille": 0.64,
+        "stenosis_coefficient": 0
+      }
+    },
+    {
+      "vessel_id": 5,
+      "vessel_length": 10.0,
+      "vessel_name": "DUMMY_AV",
+      "zero_d_element_type": "BloodVesselCRL",
+      "zero_d_element_values": {
+        "C": 0.0,
+        "L": 0.0,
+        "R_poiseuille": 0.0,
+        "stenosis_coefficient": 0
+      }
+    },
+    {
+      "vessel_id": 6,
+      "vessel_length": 10.0,
+      "vessel_name": "DUMMY_MV",
+      "zero_d_element_type": "BloodVesselCRL",
+      "zero_d_element_values": {
+        "C": 0.0,
+        "L": 0.0,
+        "R_poiseuille": 0.0,
+        "stenosis_coefficient": 0
+      }
+    }
+  ],
+  "chambers": [
+    {
+      "name": "LA",
+      "type": "PiecewiseCosineChamber",
+      "values": {
+        "Emax": 0.2,
+        "Epass": 0.15,
+        "Vrest": 4.0,
+        "contract_start": 0.025,
+        "contract_duration": 0.061250000000000006,
+        "relax_duration": 0.18375000000000002,
+        "T_HB": 0.68967
+      }
+    },
+    {
+      "name": "RA",
+      "type": "PiecewiseCosineChamber",
+      "values": {
+        "Emax": 0.06,
+        "Epass": 0.05,
+        "Vrest": 4.0,
+        "contract_start": 0.025,
+        "contract_duration": 0.061250000000000006,
+        "relax_duration": 0.18375000000000002,
+        "T_HB": 0.68967
+      }
+    },
+    {
+      "name": "RV",
+      "type": "PiecewiseCosineChamber",
+      "values": {
+        "Emax": 0.55,
+        "Epass": 0.05,
+        "Vrest": 16.0,
+        "contract_start": 0.207,
+        "contract_duration": 0.08975000000000002,
+        "relax_duration": 0.2692500000000001,
+        "T_HB": 0.68967
+      }
+    }
+  ],
+  "valves": [
+    {
+      "type": "PiecewiseValve",
+      "name": "PV",
+      "params": {
+        "Rmax": 50,
+        "Rmin": 0.005,
+        "upstream_block": "RV",
+        "downstream_block": "ART_PUL"
+      }
+    },
+    {
+      "type": "PiecewiseValve",
+      "name": "TV",
+      "params": {
+        "Rmax": 50,
+        "Rmin": 0.005,
+        "upstream_block": "RA",
+        "downstream_block": "RV"
+      }
+    },
+    {
+      "type": "PiecewiseValve",
+      "name": "AV",
+      "params": {
+        "Rmax": 50,
+        "Rmin": 0.005,
+        "upstream_block": "DUMMY_AV",
+        "downstream_block": "ART_SYS"
+      }
+    },
+    {
+      "type": "PiecewiseValve",
+      "name": "MV",
+      "params": {
+        "Rmax": 50,
+        "Rmin": 0.005,
+        "upstream_block": "LA",
+        "downstream_block": "DUMMY_MV"
+      }
+    }
+  ],
+  "initial_condition": {
+    "pressure:VEN_PUL:J0": 9.28411061663363,
+    "pressure:J0:LA": 9.28411061663363,
+    "pressure:ART_PUL:J1": 14.40407877621124,
+    "pressure:J1:VEN_PUL": 14.404078776211245,
+    "pressure:VEN_SYS:J2": 4.31169480639712,
+    "pressure:J2:RA": 4.31169480639712,
+    "pressure:ART_SYS:J3": 42.12744363472372,
+    "pressure:J3:VEN_SYS": 42.12744363472372,
+    "pressure:RV:PV": 3.900489929636586,
+    "pressure:PV:ART_PUL": 16.855676692793256,
+    "pressure:RA:TV": 4.311694806394712,
+    "pressure:TV:RV": 3.900489929636586,
+    "pressure:DUMMY_AV:AV": 8.78730296259531,
+    "pressure:AV:ART_SYS": 105.73447580722068,
+    "pressure:LA:MV": 9.28411061663363,
+    "pressure:MV:DUMMY_MV": 8.78730296259531,
+    "Vc:LA": 65.89407077755752,
+    "Vc:RA": 90.23389612794237,
+    "Vc:RV": 94.00979859273171,
+    "Vc:LV": 113.63669958439236
+  }
+}
