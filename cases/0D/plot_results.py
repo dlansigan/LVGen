@@ -1,0 +1,143 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import pyvista as pv
+import os
+import glob
+from cycler import cycler
+
+def get_var(df,var):
+    return df.loc[df["name"]==var,"y"]
+
+if __name__=="__main__":
+
+    # Define params
+    case_path = "."
+    tstart, tend = 32000, -1
+    save_path = "IC.dat"
+
+    # Plotting settings
+    color_cycle = ['#377eb8', '#ff7f00', '#4daf4a','#f781bf',]
+    line_cycle = ['-', '--', ':', '-.']
+    plt.rc('axes', prop_cycle=(cycler('color', color_cycle) +
+                            cycler('linestyle', line_cycle)))
+
+    # Read svZeroD
+    fn = os.path.join(case_path,"output.csv")
+    sv0d = pd.read_csv(fn)
+    # print(sv0d)
+
+    # Plot  circulation vs time
+    t = sv0d["time"].unique()
+    p_pul = [
+             get_var(sv0d,"pressure:PV:ART_PUL"),
+             get_var(sv0d,"pressure:ART_PUL:J1"),
+             get_var(sv0d,"pressure:J1:VEN_PUL"),
+             get_var(sv0d,"pressure:VEN_PUL:J0"),
+            ]
+    p_sys = [
+             get_var(sv0d,"pressure:AV:ART_SYS"),
+             get_var(sv0d,"pressure:ART_SYS:J3"),
+             get_var(sv0d,"pressure:J3:VEN_SYS"),
+             get_var(sv0d,"pressure:VEN_SYS:J2"),
+            ]
+    q_pul = [
+             get_var(sv0d,"flow:PV:ART_PUL"),
+             get_var(sv0d,"flow:ART_PUL:J1"),
+             get_var(sv0d,"flow:J1:VEN_PUL"),
+             get_var(sv0d,"flow:VEN_PUL:J0"),
+            ]
+    q_sys = [
+             get_var(sv0d,"flow:AV:ART_SYS"),
+             get_var(sv0d,"flow:ART_SYS:J3"),
+             get_var(sv0d,"flow:J3:VEN_SYS"),
+             get_var(sv0d,"flow:VEN_SYS:J2"),
+            ]
+    p_cha_left = [
+             get_var(sv0d,"pressure:J0:LA"),
+             get_var(sv0d,"pressure:LA:MV"),
+             get_var(sv0d,"pressure:MV:LV"),
+             get_var(sv0d,"pressure:LV:AV"),
+            ]
+    q_cha_left = [
+             get_var(sv0d,"flow:J0:LA"),
+             get_var(sv0d,"flow:LA:MV"),
+             get_var(sv0d,"flow:MV:LV"),
+             get_var(sv0d,"flow:LV:AV"),
+            ]
+    p_cha_right = [
+             get_var(sv0d,"pressure:J2:RA"),
+             get_var(sv0d,"pressure:RA:TV"),
+             get_var(sv0d,"pressure:TV:RV"),
+             get_var(sv0d,"pressure:RV:PV"),
+            ]
+    q_cha_right = [
+             get_var(sv0d,"flow:J2:RA"),
+             get_var(sv0d,"flow:RA:TV"),
+             get_var(sv0d,"flow:TV:RV"),
+             get_var(sv0d,"flow:RV:PV"),
+            ]
+    fig1,ax1=plt.subplots(4,2,figsize=(10,12))
+    # Pulmonary/systemic
+    for i in range(len(p_pul)):
+        ax1[0,0].plot(t[tstart:tend],p_pul[i][tstart:tend])
+        ax1[1,0].plot(t[tstart:tend],p_sys[i][tstart:tend])
+        ax1[0,1].plot(t[tstart:tend],q_pul[i][tstart:tend])
+        ax1[1,1].plot(t[tstart:tend],q_sys[i][tstart:tend])
+    # Chambers
+    for i in range(len(p_cha_left)):
+        ax1[2,0].plot(t[tstart:tend],p_cha_left[i][tstart:tend])
+        ax1[2,1].plot(t[tstart:tend],q_cha_left[i][tstart:tend])
+        ax1[3,0].plot(t[tstart:tend],p_cha_right[i][tstart:tend])
+        ax1[3,1].plot(t[tstart:tend],q_cha_right[i][tstart:tend])
+    ax1[0,0].set_ylabel("Pulmonary")
+    ax1[1,0].set_ylabel("Systemic")
+    ax1[2,0].set_ylabel("Left Heart")
+    ax1[3,0].set_ylabel("Right Heart")
+    ax1[0,0].set_title("Pressure")
+    ax1[0,1].set_title("Flow")
+    ax1[-1,0].set_xlabel("Time")
+    ax1[-1,1].set_xlabel("Time")
+
+    # Get pressures and volumes for LA, RV, RA from svZeroD sv0d
+    p_LA = get_var(sv0d,"pressure:LA:MV")
+    p_LV = get_var(sv0d,"pressure:LV:AV")
+    p_RV = get_var(sv0d,"pressure:RV:PV")
+    p_RA = get_var(sv0d,"pressure:RA:TV")
+    v_LV = get_var(sv0d,"Vc:LV")
+    v_LA = get_var(sv0d,"Vc:LA")
+    v_RV = get_var(sv0d,"Vc:RV")
+    v_RA = get_var(sv0d,"Vc:RA")
+
+    # Plot PV curves
+    chambers = {
+        "RA": [p_RA, v_RA],
+        "LA": [p_LA, v_LA],
+        "RV": [p_RV, v_RV],
+        "LV": [p_LV, v_LV],
+    }
+    fig2,ax2 = plt.subplots(2,2,tight_layout=True)
+    ax2 = ax2.flatten()
+    for i,name in enumerate(chambers):
+        ax2[i].plot(chambers[name][1][tstart:tend],chambers[name][0][tstart:tend])
+        ax2[i].set_title(name)
+    ax2[2].set_xlabel("V")
+    ax2[3].set_xlabel("V")
+    ax2[0].set_ylabel("P")
+    ax2[2].set_ylabel("P")
+    
+    fig3,ax3 = plt.subplots(1,1,tight_layout=True)
+    for i,name in enumerate(chambers):
+        ax3.plot(t[tstart:tend],chambers[name][1][tstart:tend],label=name)
+    ax3.set_xlabel("t")
+    ax3.set_ylabel("v")
+    ax3.legend()
+
+    # Write ICs for 3D-0D sim
+    with open(save_path, 'w') as file:
+        for name in sorted(sv0d["name"].unique()):
+            val = str(get_var(sv0d,name).iloc[-1])
+            file.write(f"\"{name}\": {val},\n")
+    file.close()
+
+    plt.show()

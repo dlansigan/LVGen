@@ -1,0 +1,230 @@
+{
+  "simulation_parameters": {
+    "number_of_cardiac_cycles": 50,
+    "number_of_time_pts_per_cardiac_cycle": 689,
+    "output_variable_based": true,
+    "output_all_cycles": true,
+    "steady_initial": false,
+    "cardiac_period": 0.689655
+  },
+  "boundary_conditions": [],
+  "junctions": [
+    {
+      "inlet_blocks": [
+        "VEN_PUL"
+      ],
+      "junction_name": "J0",
+      "junction_type": "NORMAL_JUNCTION",
+      "outlet_blocks": [
+        "LA"
+      ]
+    },
+    {
+      "inlet_blocks": [
+        "ART_PUL"
+      ],
+      "junction_name": "J1",
+      "junction_type": "NORMAL_JUNCTION",
+      "outlet_blocks": [
+        "VEN_PUL"
+      ]
+    },
+    {
+      "inlet_blocks": [
+        "VEN_SYS"
+      ],
+      "junction_name": "J2",
+      "junction_type": "NORMAL_JUNCTION",
+      "outlet_blocks": [
+        "RA"
+      ]
+    },
+    {
+      "inlet_blocks": [
+        "ART_SYS"
+      ],
+      "junction_name": "J3",
+      "junction_type": "NORMAL_JUNCTION",
+      "outlet_blocks": [
+        "VEN_SYS"
+      ]
+    }
+  ],
+  "vessels": [
+    {
+      "vessel_id": 1,
+      "vessel_length": 10.0,
+      "vessel_name": "VEN_PUL",
+      "zero_d_element_type": "BloodVesselCRL",
+      "zero_d_element_values": {
+        "C": 16.0,
+        "L": 0.0005,
+        "R_poiseuille": 0.035,
+        "stenosis_coefficient": 0
+      }
+    },
+    {
+      "vessel_id": 2,
+      "vessel_length": 10.0,
+      "vessel_name": "ART_PUL",
+      "zero_d_element_type": "BloodVesselCRL",
+      "zero_d_element_values": {
+        "C": 10.0,
+        "L": 0.0005,
+        "R_poiseuille": 0.032,
+        "stenosis_coefficient": 0
+      }
+    },
+    {
+      "vessel_id": 3,
+      "vessel_length": 10.0,
+      "vessel_name": "VEN_SYS",
+      "zero_d_element_type": "BloodVesselCRL",
+      "zero_d_element_values": {
+        "C": 60.0,
+        "L": 0.0005,
+        "R_poiseuille": 0.32,
+        "stenosis_coefficient": 0
+      }
+    },
+    {
+      "vessel_id": 4,
+      "vessel_length": 10.0,
+      "vessel_name": "ART_SYS",
+      "zero_d_element_type": "BloodVesselCRL",
+      "zero_d_element_values": {
+        "C": 1.2,
+        "L": 0.005,
+        "R_poiseuille": 0.64,
+        "stenosis_coefficient": 0
+      }
+    }
+  ],
+  "chambers": [
+    {
+      "name": "LA",
+      "type": "PiecewiseCosineChamber",
+      "values": {
+        "Emax": 0.2,
+        "Epass": 0.15,
+        "Vrest": 4.0,
+        "contract_start": 0.025,
+        "contract_duration": 0.061250000000000006,
+        "relax_duration": 0.18375000000000002,
+        "T_HB": 0.6896551724137931
+      }
+    },
+    {
+      "name": "RA",
+      "type": "PiecewiseCosineChamber",
+      "values": {
+        "Emax": 0.06,
+        "Epass": 0.05,
+        "Vrest": 4.0,
+        "contract_start": 0.025,
+        "contract_duration": 0.061250000000000006,
+        "relax_duration": 0.18375000000000002,
+        "T_HB": 0.6896551724137931
+      }
+    },
+    {
+      "name": "RV",
+      "type": "PiecewiseCosineChamber",
+      "values": {
+        "Emax": 0.55,
+        "Epass": 0.05,
+        "Vrest": 16.0,
+        "contract_start": 0.207,
+        "contract_duration": 0.08975000000000002,
+        "relax_duration": 0.2692500000000001,
+        "T_HB": 0.6896551724137931
+      }
+    },
+    {
+      "name": "LV",
+      "type": "PiecewiseCosineChamber",
+      "values": {
+        "Emax": 2.749,
+        "Epass": 0.09,
+        "Vrest": 16.0,
+        "contract_start": 0.207,
+        "contract_duration": 0.08975000000000002,
+        "relax_duration": 0.2692500000000001,
+        "T_HB": 0.6896551724137931
+      }
+    }
+  ],
+  "valves": [
+    {
+      "type": "PiecewiseValve",
+      "name": "PV",
+      "params": {
+        "Rmax": 50,
+        "Rmin": 0.005,
+        "upstream_block": "RV",
+        "downstream_block": "ART_PUL"
+      }
+    },
+    {
+      "type": "PiecewiseValve",
+      "name": "TV",
+      "params": {
+        "Rmax": 50,
+        "Rmin": 0.005,
+        "upstream_block": "RA",
+        "downstream_block": "RV"
+      }
+    },
+    {
+      "type": "PiecewiseValve",
+      "name": "AV",
+      "params": {
+        "Rmax": 50,
+        "Rmin": 0.005,
+        "upstream_block": "LV",
+        "downstream_block": "ART_SYS"
+      }
+    },
+    {
+      "type": "PiecewiseValve",
+      "name": "MV",
+      "params": {
+        "Rmax": 50,
+        "Rmin": 0.005,
+        "upstream_block": "LA",
+        "downstream_block": "LV"
+      }
+    }
+  ],
+  "initial_condition":{
+    "Vc:LA": 75.60953203763704,  
+    "Vc:LV": 140.87115100000003, 
+    "Vc:RA": 75.10614460364727,  
+    "Vc:RV": 125.16916470360742,
+    "pressure:VEN_PUL:J0": 24.828991656015358,
+    "pressure:J0:LA": 23.221669413038278,
+    "pressure:ART_PUL:J1": 24.828991656015358,
+    "pressure:J1:VEN_PUL": 24.828991656015358,
+    "pressure:VEN_SYS:J2": 7.66863076513064,
+    "pressure:J2:RA": 7.66863076513064,
+    "pressure:ART_SYS:J3": 37.02342293326058,
+    "pressure:J3:VEN_SYS": 37.02342293326058,
+    "pressure:RV:PV": 47.001257211873614,
+    "pressure:PV:ART_PUL": 26.25170013422248,
+    "pressure:RA:TV": 7.66863076513064,
+    "pressure:TV:RV": 5.443734052059726,
+    "pressure:LV:AV": 23.106673019492554,
+    "pressure:AV:ART_SYS": 99.4852044191942,
+    "pressure:LA:MV": 23.221669413038278,
+    "pressure:MV:LV": 23.106673019492554,    
+    "flow:ART_PUL:J1": 46.21258343525287,
+    "flow:J1:VEN_PUL": 46.21258343525287,
+    "flow:ART_SYS:J3": 91.7823852744552,
+    "flow:J3:VEN_SYS": 91.7823852744552,
+    "flow:RV:PV": 47.001257211873614,
+    "flow:PV:ART_PUL": 47.001257211873614,
+    "flow:LV:AV": 74.80159179163725,
+    "flow:AV:ART_SYS": 74.80159179163725,
+
+  }
+}

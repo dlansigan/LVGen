@@ -5,8 +5,8 @@ import glob
 from pygifsicle import optimize
 
 if __name__=="__main__":
-    case_name = "LV_0"
-    results_path = os.path.join("cases2",case_name,"4-procs")
+    case_name = "LV_regazzoni"
+    results_path = os.path.join("cases",case_name,"4-procs")
     files = sorted(glob.glob(os.path.join(results_path,"result*.vtu")))
 
     os.makedirs("anim",exist_ok=True)
