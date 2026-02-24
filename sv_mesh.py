@@ -6,46 +6,47 @@ import argparse
 import sys
 sys.path.append("interp-src")
 import utils
+from io_utils import write_vtk_polydata, write_vtu_file
 
 ### VTK writing functions from https://github.com/fkong7/Auto-LV-Modeling/blob/SimVascular/Modeling/src/io_utils.py ###
 
-def write_vtu_file(ug, fn):
-    print('Writing vts with name:', fn)
-    if (fn == ''):
-        raise ValueError('File name is empty')
-    writer = vtk.vtkXMLUnstructuredGridWriter()
-    writer.SetInputData(ug)
-    writer.SetFileName(fn)
-    writer.Update()
-    writer.Write()
+# def write_vtu_file(ug, fn):
+#     print('Writing vts with name:', fn)
+#     if (fn == ''):
+#         raise ValueError('File name is empty')
+#     writer = vtk.vtkXMLUnstructuredGridWriter()
+#     writer.SetInputData(ug)
+#     writer.SetFileName(fn)
+#     writer.Update()
+#     writer.Write()
 
-def write_vtk_polydata(poly, fn):
-    """
-    This function writes a vtk polydata to disk
-    Args:
-        poly: vtk polydata
-        fn: file name
-    Returns:
-        None
-    """
+# def write_vtk_polydata(poly, fn):
+#     """
+#     This function writes a vtk polydata to disk
+#     Args:
+#         poly: vtk polydata
+#         fn: file name
+#     Returns:
+#         None
+#     """
     
-    print('Writing vtp with name:', fn)
-    if (fn == ''):
-        return 0
+#     print('Writing vtp with name:', fn)
+#     if (fn == ''):
+#         return 0
 
-    _ , extension = os.path.splitext(fn)
+#     _ , extension = os.path.splitext(fn)
 
-    if extension == '.vtk':
-        writer = vtk.vtkPolyDataWriter()
-    elif extension == '.vtp':
-        writer = vtk.vtkXMLPolyDataWriter()
-    else:
-        raise ValueError("Incorrect extension"+extension)
-    writer.SetInputData(poly)
-    writer.SetFileName(fn)
-    writer.Update()
-    writer.Write()
-    return
+#     if extension == '.vtk':
+#         writer = vtk.vtkPolyDataWriter()
+#     elif extension == '.vtp':
+#         writer = vtk.vtkXMLPolyDataWriter()
+#     else:
+#         raise ValueError("Incorrect extension"+extension)
+#     writer.SetInputData(poly)
+#     writer.SetFileName(fn)
+#     writer.Update()
+#     writer.Write()
+#     return
 
 def generate_mesh(fn, ops):
     mesher = meshing.create_mesher(meshing.Kernel.TETGEN)  
@@ -67,7 +68,8 @@ if __name__=="__main__":
     parser.add_argument("--template_dir", type=str, required=True)
     parser.add_argument("--save_dir", type=str, required=True)
     parser.add_argument("--overwrite", action="store_true")
-    parser.add_argument("--n_meshes", type=int, default=1)
+    parser.add_argument("--case", type=str)
+    parser.add_argument("--mesh_id", type=str, default=0)
     args = parser.parse_args()
 
     template_dir = args.template_dir #"../data/template_LV/LV/"
@@ -78,33 +80,32 @@ if __name__=="__main__":
     mesh_ops = {
             'surface_mesh_flag': False,
             'volume_mesh_flag': True,
-            'global_edge_size': 0.01, 
+            'global_edge_size': 1, 
     }
 
-    for n in range(args.n_meshes):
-        # Get filename for phase 0
-        mesh_dir = "mesh_{}_less_motion".format(str(n))
-        fn = os.path.join(template_dir,mesh_dir,"phase0.vtp")
-        print(fn)
+    # Get filename for phase 0
+    mesh_dir = "mesh_{}_less_motion".format(args.mesh_id)
+    fn = os.path.join(template_dir,mesh_dir,"phase0.vtp")
+    print(fn)
 
-        # Set up directories for saving
-        case_dir = "LV_{}/mesh".format(str(n))
-        vol_fn = os.path.join(save_dir,case_dir,"mesh_complete.vtu")
-        surf_fn = os.path.join(save_dir,case_dir,"mesh_complete_surface.vtp")
-        os.makedirs(os.path.join(save_dir,case_dir),exist_ok=True)
-        os.makedirs(os.path.join(save_dir,case_dir,"mesh-surfaces"),exist_ok=True)
+    # Set up directories for saving
+    case_dir = "LV_{}/mesh".format(args.case)
+    vol_fn = os.path.join(save_dir,case_dir,"mesh_complete.vtu")
+    surf_fn = os.path.join(save_dir,case_dir,"mesh_complete_surface.vtp")
+    os.makedirs(os.path.join(save_dir,case_dir),exist_ok=True)
+    os.makedirs(os.path.join(save_dir,case_dir,"mesh-surfaces"),exist_ok=True)
 
-        if not os.path.exists(vol_fn) or overwrite: # If volume mesh exists, assumes all others do, too
+    if not os.path.exists(vol_fn) or overwrite: # If volume mesh exists, assumes all others do, too
 
-            vol_mesh, surf_mesh, face_ids = generate_mesh(fn,mesh_ops)
+        vol_mesh, surf_mesh, face_ids = generate_mesh(fn,mesh_ops)
 
-            print(vol_mesh.GetCellData())
+        print(vol_mesh)
 
-            # Extract faces
-            for i,id in enumerate(face_ids):
-                face_fn = os.path.join(save_dir,case_dir,"mesh-surfaces","{}.vtp".format(face_names[i]))
-                face = utils.threshold_polydata(surf_mesh, "ModelFaceID", (id,id))
-                write_vtk_polydata(face,face_fn)
+        # Extract faces
+        for i,id in enumerate(face_ids):
+            face_fn = os.path.join(save_dir,case_dir,"mesh-surfaces","{}.vtp".format(face_names[i]))
+            face = utils.threshold_polydata(surf_mesh, "ModelFaceID", (id,id))
+            write_vtk_polydata(face,face_fn)
 
-            write_vtk_polydata(surf_mesh,surf_fn)
-            write_vtu_file(vol_mesh,vol_fn)
+        write_vtk_polydata(surf_mesh,surf_fn)
+        write_vtu_file(vol_mesh,vol_fn)

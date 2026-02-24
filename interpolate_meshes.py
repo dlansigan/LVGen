@@ -155,7 +155,7 @@ def move_mesh_linear(meshes, start_point, intpl_num, num_cycle):
 
 def write_motion(meshes,  interp_type, start_point, intpl_num, output_dir, num_cycle, duration, debug=False, scale=1.):
     total_num_phase = len(meshes)
-    total_steps = num_cycle* total_num_phase * (intpl_num+1)#+1
+    total_steps = num_cycle* total_num_phase * (intpl_num+1)+1
     initialized = False
     time_pts = np.linspace(0,num_cycle*duration, total_steps)
     

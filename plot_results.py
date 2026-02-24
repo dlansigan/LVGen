@@ -5,17 +5,23 @@ import pyvista as pv
 import os
 import glob
 from cycler import cycler
+import argparse
 
 if __name__=="__main__":
+    parser = argparse.ArgumentParser()
+    
+    parser.add_argument("--case", type=str)
+    parser.add_argument("--calc_vol", action="store_true")
+    args = parser.parse_args()
 
-    case_path = "cases/LV_regazzoni"
-    calc_LV_vol = False
+    case_path = args.case
+    calc_LV_vol = args.calc_vol
 
     # Plotting settings
-    color_cycle = ['#377eb8', '#ff7f00', '#4daf4a','#f781bf',]
-    line_cycle = ['-', '--', ':', '-.']
-    plt.rc('axes', prop_cycle=(cycler('color', color_cycle) +
-                            cycler('linestyle', line_cycle)))
+    color_cycle = ["#377eb8", "#ff7f00", "#4daf4a","#f781bf",]
+    line_cycle = ["-", "--", ":", "-."]
+    plt.rc("axes", prop_cycle=(cycler("color", color_cycle) +
+                            cycler("linestyle", line_cycle)))
 
     # Read svZeroD
     fn = os.path.join(case_path,"svZeroD_data")
@@ -117,20 +123,21 @@ if __name__=="__main__":
             mesh = pv.read(fn)
             mesh.set_active_vectors("Displacement")
             mesh = mesh.warp_by_vector()
-            mesh = mesh.extract_surface(algorithm='geometry')
+            mesh = mesh.extract_surface(algorithm="geometry")
             v_LV.append(mesh.volume)
         v_LV = np.array(v_LV)
         np.save(v_LV_fn,v_LV)
     else:
         v_LV = np.load(v_LV_fn)
 
+    print(v_LV[0], v_RV[0], v_LA[0], v_RA[0])
     print(np.max(v_LV),np.max(v_RV))
 
     # Plot PV curves
     chambers = {
         "LA": [p_LA, v_LA],
         "RA": [p_RA, v_RA],
-        # "LV": [p_LV, v_LV],
+        "LV": [p_LV, v_LV],
         "RV": [p_RV, v_RV],
     }
     fig2,ax2 = plt.subplots(2,2,tight_layout=True)

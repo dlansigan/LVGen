@@ -2,14 +2,20 @@ import numpy as np
 import pyvista as pv
 import glob
 import os
+import argparse
 
 if __name__=="__main__":
-    interp_dir = 'meshes/mesh_0/motion/Debug'
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--interp_dir', type=str)
+    parser.add_argument('--n_meshes', type=int, default=1)
+    args = parser.parse_args()
+
+    interp_dir = args.interp_dir
+    n_meshes = args.n_meshes
     fns = sorted(glob.glob(os.path.join(interp_dir,'debug*.vtp')))
     n_phases = len(fns)
-    n_meshes = 3
 
-    n_cols = 3
+    n_cols = n_meshes
     n_rows = 1
     pl = pv.Plotter(shape=(n_rows,n_cols),border=False)
     pl.open_gif('meshes_interp.gif',fps=50)
@@ -18,7 +24,7 @@ if __name__=="__main__":
     for phase in range(n_phases):
         for n in range(n_meshes):
             # Load mesh at phase
-            interp_dir = "meshes/mesh_{}/motion/Debug".format(str(n))
+            # interp_dir = "meshes/mesh_{}/motion/Debug".format(str(n))
             phase_name = os.path.basename(fns[phase])
             fn = os.path.join(interp_dir,phase_name)
 
