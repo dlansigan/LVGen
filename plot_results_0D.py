@@ -5,17 +5,22 @@ import pyvista as pv
 import os
 import glob
 from cycler import cycler
+import argparse
 
 def get_var(df,var):
-    return df.loc[df["name"]==var,"y"]
+    return df.loc[df["name"]==var,"y"].to_numpy()
 
 if __name__=="__main__":
+    parser = argparse.ArgumentParser()
+    
+    parser.add_argument("--case", type=str)
+    args = parser.parse_args()
+
+    case_path = args.case
 
     # Define params
-    case_path = "."
-    tstart, tend = 32000, -1
-    save_path = "IC.dat"
-
+    tstart, tend = 4000, -1
+    save_path = os.path.join(case_path,"IC.dat")
     # Plotting settings
     color_cycle = ['#377eb8', '#ff7f00', '#4daf4a','#f781bf',]
     line_cycle = ['-', '--', ':', '-.']
@@ -133,10 +138,21 @@ if __name__=="__main__":
     ax3.set_ylabel("v")
     ax3.legend()
 
+    # Post-process valve resistances: (P_in-P_out)/Q_in
+    R_MV = (get_var(sv0d,"pressure:LA:MV") - get_var(sv0d,"pressure:MV:LV")) / get_var(sv0d,"flow:LA:MV")
+    R_AV = (get_var(sv0d,"pressure:LV:AV") - get_var(sv0d,"pressure:AV:ART_SYS")) / get_var(sv0d,"flow:LV:AV")
+    R_TV = (get_var(sv0d,"pressure:RA:TV") - get_var(sv0d,"pressure:TV:RV")) / get_var(sv0d,"flow:RA:TV")
+    R_PV = (get_var(sv0d,"pressure:RV:PV") - get_var(sv0d,"pressure:PV:ART_PUL")) / get_var(sv0d,"flow:RV:PV")
+    fig4,ax4 = plt.subplots(4,1,tight_layout=True)
+    ax4[0].plot(t[tstart:tend],R_MV[tstart:tend])
+    ax4[1].plot(t[tstart:tend],R_AV[tstart:tend])
+    ax4[2].plot(t[tstart:tend],R_TV[tstart:tend])
+    ax4[3].plot(t[tstart:tend],R_PV[tstart:tend])
+
     # Write ICs for 3D-0D sim
     with open(save_path, 'w') as file:
         for name in sorted(sv0d["name"].unique()):
-            val = str(get_var(sv0d,name).iloc[-1])
+            val = str(get_var(sv0d,name)[-1])
             file.write(f"\"{name}\": {val},\n")
     file.close()
 

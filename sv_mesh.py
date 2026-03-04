@@ -7,6 +7,7 @@ import sys
 sys.path.append("interp-src")
 import utils
 from io_utils import write_vtk_polydata, write_vtu_file
+import glob
 
 ### VTK writing functions from https://github.com/fkong7/Auto-LV-Modeling/blob/SimVascular/Modeling/src/io_utils.py ###
 
@@ -70,6 +71,7 @@ if __name__=="__main__":
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--case", type=str)
     parser.add_argument("--mesh_id", type=str, default=0)
+    parser.add_argument("--phase", type=int, default=-1)
     args = parser.parse_args()
 
     template_dir = args.template_dir #"../data/template_LV/LV/"
@@ -84,9 +86,10 @@ if __name__=="__main__":
     }
 
     # Get filename for phase 0
-    mesh_dir = "mesh_{}_less_motion".format(args.mesh_id)
-    fn = os.path.join(template_dir,mesh_dir,"phase0.vtp")
-    print(fn)
+    mesh_dir = "mesh_{}".format(args.mesh_id)
+    fns = sorted(glob.glob(os.path.join(template_dir,mesh_dir, "phase*.vtp")))
+    # fn = os.path.join(template_dir,mesh_dir,"phase{}.vtp")
+    fn = fns[args.phase]
 
     # Set up directories for saving
     case_dir = "LV_{}/mesh".format(args.case)
@@ -99,7 +102,7 @@ if __name__=="__main__":
 
         vol_mesh, surf_mesh, face_ids = generate_mesh(fn,mesh_ops)
 
-        print(vol_mesh)
+        # print(vol_mesh)
 
         # Extract faces
         for i,id in enumerate(face_ids):

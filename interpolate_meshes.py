@@ -9,7 +9,7 @@ import io_utils
 import utils
 import re
 import vtk
-from scipy.interpolate import CubicSpline, make_interp_spline
+from scipy.interpolate import CubicSpline
 
 """
 Functions to write interpolated surface meshes for perscribed wall motion
@@ -110,6 +110,7 @@ def move_mesh_cubic(meshes, start_point, intpl_num, num_cycle):
     mesh_points = np.array(mesh_point_list)
     time_list = [-3, -2, -1] + list(range(total_num_phase)) + \
             [total_num_phase, total_num_phase+1, total_num_phase+2]
+    
     cs = CubicSpline(np.array(time_list), mesh_points)
     
     time_interp = np.linspace(0, total_num_phase, total_num_phase * (intpl_num+1))
@@ -123,37 +124,7 @@ def move_mesh_cubic(meshes, start_point, intpl_num, num_cycle):
         store[:,:,s:e] = displacements
     return store
 
-def move_mesh_linear(meshes, start_point, intpl_num, num_cycle):
-    total_num_phase = len(meshes)
-    total_steps = total_num_phase * (intpl_num+1)*num_cycle
-    poly_template = meshes[start_point]
-    ref_coords = vtk_to_numpy(poly_template.GetPoints().GetData())
-    store = np.zeros((poly_template.GetNumberOfPoints(), 3, total_steps+1)) 
-    count = 0
-    mesh_list = [meshes[idx] for idx in list(range(start_point, total_num_phase)) +\
-            list(range(0, start_point))]
-    # mesh_list = [mesh_list[-3], mesh_list[-2], mesh_list[-1]] + mesh_list + \
-    #         [mesh_list[0], mesh_list[1], mesh_list[2]]
-    mesh_point_list = [vtk_to_numpy(m.GetPoints().GetData()) for m in mesh_list]
-    mesh_points = np.array(mesh_point_list)
-    time_list = list(range(total_num_phase)) 
-    # time_list = [-3, -2, -1] + time_list + \
-    #         [total_num_phase, total_num_phase+1, total_num_phase+2]
-    linear_interp = make_interp_spline(np.array(time_list), mesh_points,k=1)
-    
-    # NOTE: this uses different start and end times as move_mesh_cubic
-    time_interp = np.linspace(time_list[0],time_list[-1], total_num_phase * (intpl_num+1))
-    new_coords = linear_interp(time_interp).transpose(1, 2, 0)
-    displacements = new_coords - np.expand_dims(ref_coords, axis=-1)
-    
-    ## The rest cycles are copies of first cycle
-    for c in range(num_cycle):
-        s = c*total_num_phase * (intpl_num+1)
-        e = s + total_num_phase * (intpl_num+1)
-        store[:,:,s:e] = displacements
-    return store
-
-def write_motion(meshes,  interp_type, start_point, intpl_num, output_dir, num_cycle, duration, debug=False, scale=1.):
+def write_motion(meshes,  start_point, intpl_num, output_dir, num_cycle, duration, debug=False, scale=1.):
     total_num_phase = len(meshes)
     total_steps = num_cycle* total_num_phase * (intpl_num+1)+1
     initialized = False
@@ -161,14 +132,8 @@ def write_motion(meshes,  interp_type, start_point, intpl_num, output_dir, num_c
     
     poly_template = meshes[start_point]
     
-    if interp_type=='cubic':
-        displacements = move_mesh_cubic(meshes, start_point, intpl_num, num_cycle)
-    elif interp_type=='linear':
-        displacements = move_mesh_linear(meshes, start_point, intpl_num, num_cycle)
-    else:
-        raise ValueError("Unrecognized interpolation type, '%s'" % (interp_type))
+    displacements = move_mesh_cubic(meshes, start_point, intpl_num, num_cycle)
     #displacements = move_mesh_cubic_hermite(meshes, start_point, intpl_num, num_cycle)
-
     if debug:
         debug_dir = os.path.join(output_dir,"Debug")
         try:
@@ -183,7 +148,7 @@ def write_motion(meshes,  interp_type, start_point, intpl_num, output_dir, num_c
             io_utils.write_vtk_polydata(poly, fn_debug)
 
     node_ids = vtk_to_numpy(poly_template.GetPointData().GetArray('GlobalNodeID'))
-    face_ids = vtk_to_numpy(poly_template.GetCellData().GetArray('ModelFaceID')) # this used to be ModelFaceID
+    face_ids = vtk_to_numpy(poly_template.GetCellData().GetArray('ModelFaceID'))
     #write time steps and node numbers
     for face in np.unique(face_ids):
         fn = os.path.join(output_dir, '%d_displacement.dat' % face)
@@ -195,15 +160,15 @@ def write_motion(meshes,  interp_type, start_point, intpl_num, output_dir, num_c
         #f.write('{}\n'.format(face_poly.GetNumberOfPoints()))
         face_ids = vtk_to_numpy(face_poly.GetPointData().GetArray('GlobalNodeID'))
         node_id_index = find_index_in_array(node_ids, face_ids)
-        if debug:
-            coords = vtk_to_numpy(face_poly.GetPoints().GetData())
-            poly = vtk.vtkPolyData()
-            poly.DeepCopy(face_poly)
-            face_displacements = displacements[node_id_index, :, :] * scale
-            for ii in range(face_displacements.shape[-1]):
-                poly.GetPoints().SetData(numpy_to_vtk(face_displacements[:,:,ii]+coords*scale))
-                fn_debug = os.path.join(debug_dir, "face{}debug{:05d}.vtp".format(face, ii))
-                io_utils.write_vtk_polydata(poly, fn_debug)
+        # if debug:
+        #     coords = vtk_to_numpy(face_poly.GetPoints().GetData())
+        #     poly = vtk.vtkPolyData()
+        #     poly.DeepCopy(face_poly)
+        #     face_displacements = displacements[node_id_index, :, :] * scale
+        #     for ii in range(face_displacements.shape[-1]):
+        #         poly.GetPoints().SetData(numpy_to_vtk(face_displacements[:,:,ii]+coords*scale))
+        #         fn_debug = os.path.join(debug_dir, "face{}debug{:05d}.vtp".format(face, ii))
+        #         io_utils.write_vtk_polydata(poly, fn_debug)
         for i in node_id_index:
             disp = displacements[i, :, :] * scale
             f.write('{}\n'.format(node_ids[i]))
@@ -222,7 +187,6 @@ if __name__=='__main__':
     
     parser.add_argument('--input_dir', help="Path to the surface meshes")
     parser.add_argument('--output_dir', help="Path to the volume meshes")
-    parser.add_argument('--interp_type', type=str, default='cubic', help="Interpolation type. Default: cubic.")
     parser.add_argument('--num_interpolation', type=int, help="Number of interpolations")
     parser.add_argument('--num_cycle', type=int, help="Number of cardiac cycles")
     parser.add_argument('--duration', type=float, help="Cycle duration in seconds")
@@ -234,7 +198,8 @@ if __name__=='__main__':
     args = parser.parse_args()
     
     mesh_dir = args.input_dir
-    output_dir = args.output_dir#os.path.join(args.output_dir, 'mesh-complete')
+    output_dir = args.output_dir
+    # output_dir = os.path.join(args.output_dir, 'mesh-complete')
 
     try:
        os.makedirs(output_dir)
@@ -266,7 +231,7 @@ if __name__=='__main__':
             m.DeepCopy(surf_ori)
             m.GetPoints().SetData(numpy_to_vtk(points_new))
             meshes[ind] = m
-    
-    write_motion(meshes, args.interp_type,  args.phase ,args.num_interpolation, output_dir, args.num_cycle, args.duration, debug=False, scale=args.scale)
+
+    write_motion(meshes,  args.phase ,args.num_interpolation, output_dir, args.num_cycle, args.duration, debug=True, scale=args.scale)
     end = time.time()
     print("Time spent: ", end-start)

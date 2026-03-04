@@ -3,15 +3,27 @@ import pyvista as pv
 import os
 import glob
 from pygifsicle import optimize
+import argparse
+import natsort
+import cmocean as cmo
 
 if __name__=="__main__":
-    case_name = "LV_regazzoni"
-    results_path = os.path.join("cases",case_name,"4-procs")
-    files = sorted(glob.glob(os.path.join(results_path,"result*.vtu")))
+    parser = argparse.ArgumentParser()
+    
+    parser.add_argument("--case", type=str)
+    args = parser.parse_args()
+
+    case_path = args.case
+    case_name = case_path.split('/')[-2]
+    results_path = os.path.join(case_path,"4-procs")
+    files = natsort.natsorted(glob.glob(os.path.join(results_path,"result*.vtu")))
+    print("Case: " + case_name)
 
     os.makedirs("anim",exist_ok=True)
 
-    for i in range(0,len(files),2):
+    pv.global_theme.cmap = cmo.cm.balance
+
+    for i in range(0,len(files),1):
         fn = files[i]
         print(fn)
         # Read mesh
@@ -35,7 +47,7 @@ if __name__=="__main__":
 
         if i==0:
             pl = pv.Plotter()
-            pl.open_gif(os.path.join("anim",case_name+".gif"),fps=60,subrectangles=True)
+            pl.open_gif(os.path.join("anim",case_name+".gif"),fps=60)
             pl.enable_parallel_projection()
         if i>0:
             pl.remove_actor(a1)
@@ -43,7 +55,9 @@ if __name__=="__main__":
         a1 = pl.add_mesh(mesh,opacity=0.3,color='lightblue')
         # pl.add_mesh(src)
         # a2 = pl.add_mesh(streamlines.tube(radius=0.001),clim=(0.01,0.3))
-        a2 = pl.add_mesh(mesh2,scalars="Velocity",opacity=0.5,clim=(0,2),cmap='jet',show_scalar_bar=False)
+        a2 = pl.add_mesh(mesh2,scalars="Velocity",component=1,opacity=0.5,clim=(-50,50),cmap='jet',show_scalar_bar=False)
+        # a2 = pl.add_mesh(mesh2,scalars="Velocity",opacity=0.5,clim=(0,200),show_scalar_bar=False)
+        pl.show_axes()
         pl.write_frame()
     # pl.show()
     pl.close()

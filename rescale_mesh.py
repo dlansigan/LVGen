@@ -24,7 +24,7 @@ if __name__=="__main__":
     os.makedirs(save_dir,exist_ok=True)
 
     for n in range(args.n_meshes):
-        mesh_dir = "mesh_{}_less_motion".format(str(n))
+        mesh_dir = "mesh_{}".format(str(n))
         os.makedirs(os.path.join(save_dir,mesh_dir),exist_ok=True)
         files = glob.glob(os.path.join(template_dir, mesh_dir, "*.vtp"))
         for fn in files:
