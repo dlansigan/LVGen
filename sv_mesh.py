@@ -49,7 +49,7 @@ import glob
 #     writer.Write()
 #     return
 
-def generate_mesh(fn, ops):
+def generate_mesh(fn, ops, q):
     mesher = meshing.create_mesher(meshing.Kernel.TETGEN)  
     mesher.load_model(fn)
     mesher.set_walls([1])
@@ -58,7 +58,7 @@ def generate_mesh(fn, ops):
     options.no_merge = True
     options.no_bisect = True
     options.optimization = 3
-    options.quality_ratio = 1.
+    options.quality_ratio = q
     mesher.generate_mesh(options)
     vol_mesh = mesher.get_mesh()
     surf_mesh = mesher.get_surface()
@@ -72,6 +72,7 @@ if __name__=="__main__":
     parser.add_argument("--case", type=str)
     parser.add_argument("--mesh_id", type=str, default=0)
     parser.add_argument("--phase", type=int, default=-1)
+    parser.add_argument("--quality", type=float, default=1.0)
     args = parser.parse_args()
 
     template_dir = args.template_dir #"../data/template_LV/LV/"
@@ -82,7 +83,7 @@ if __name__=="__main__":
     mesh_ops = {
             'surface_mesh_flag': False,
             'volume_mesh_flag': True,
-            'global_edge_size': 1, 
+            'global_edge_size': 10, 
     }
 
     # Get filename for phase 0
@@ -100,7 +101,7 @@ if __name__=="__main__":
 
     if not os.path.exists(vol_fn) or overwrite: # If volume mesh exists, assumes all others do, too
 
-        vol_mesh, surf_mesh, face_ids = generate_mesh(fn,mesh_ops)
+        vol_mesh, surf_mesh, face_ids = generate_mesh(fn,mesh_ops,args.quality)
 
         # print(vol_mesh)
 

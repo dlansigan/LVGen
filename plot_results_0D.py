@@ -14,12 +14,15 @@ if __name__=="__main__":
     parser = argparse.ArgumentParser()
     
     parser.add_argument("--case", type=str)
+    parser.add_argument("--case_3d", type=str, default=None)
+    parser.add_argument("--save_figs", action="store_true")
     args = parser.parse_args()
 
     case_path = args.case
 
     # Define params
-    tstart, tend = 4000, -1
+    # tstart, tend = 0, 500
+    tstart, tend = -500, -1
     save_path = os.path.join(case_path,"IC.dat")
     # Plotting settings
     color_cycle = ['#377eb8', '#ff7f00', '#4daf4a','#f781bf',]
@@ -152,8 +155,25 @@ if __name__=="__main__":
     # Write ICs for 3D-0D sim
     with open(save_path, 'w') as file:
         for name in sorted(sv0d["name"].unique()):
+            if name == "Vc:LV":
+                continue
             val = str(get_var(sv0d,name)[-1])
+            name = name.replace("LV:","DUMMY_AV:")
+            name = name.replace(":LV",":DUMMY_MV")
             file.write(f"\"{name}\": {val},\n")
     file.close()
 
-    plt.show()
+    if args.case_3d:
+        mesh_fn = os.path.join(args.case_3d,"mesh","mesh_complete.vtu")
+        mesh = pv.read(mesh_fn)
+        mesh.point_data['Pressure'] = get_var(sv0d,"pressure:LV:AV")[-1]*1333.22 # mmHg to dyn/cm^2
+        # print(mesh['Pressure'])
+        mesh.save(os.path.join(args.case_3d,"mesh","init_p.vtu"))
+
+    if args.save_figs:
+        fig1.savefig(os.path.join(case_path,"p_and_q.png"))
+        fig2.savefig(os.path.join(case_path,"pv.png"))
+        fig3.savefig(os.path.join(case_path,"v_vs_t.png"))
+        fig4.savefig(os.path.join(case_path,"R.png"))
+    else:
+        plt.show()

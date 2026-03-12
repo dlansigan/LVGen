@@ -7,14 +7,36 @@ import argparse
 import natsort
 import cmocean as cmo
 
+def create_plotter(gif_path):
+    pl = pv.Plotter()
+    pl.open_gif(gif_path,fps=15)
+    pl.enable_parallel_projection()
+    return pl
+
+def refresh_plotter(pl,meshes,mesh_props,title):
+    for actor in pl.actors:
+        pl.remove_actor(actor)
+    
+    for mesh, props in zip(meshes,mesh_props):
+        pl.add_mesh(mesh,**props)
+    pl.show_axes()
+    pl.add_title(title)
+    pl.write_frame()
+
+    return pl
+
+
 if __name__=="__main__":
     parser = argparse.ArgumentParser()
     
     parser.add_argument("--case", type=str)
+    parser.add_argument("--dt", type=float, default=0.008)
     args = parser.parse_args()
 
     case_path = args.case
-    case_name = case_path.split('/')[-2]
+    temp = case_path.split('/')
+    temp = [item for item in temp if item != '']
+    case_name = temp[-1]
     results_path = os.path.join(case_path,"4-procs")
     files = natsort.natsorted(glob.glob(os.path.join(results_path,"result*.vtu")))
     print("Case: " + case_name)
@@ -23,7 +45,7 @@ if __name__=="__main__":
 
     pv.global_theme.cmap = cmo.cm.balance
 
-    for i in range(0,len(files),1):
+    for i in range(0,len(files),2):
         fn = files[i]
         print(fn)
         # Read mesh
@@ -46,20 +68,32 @@ if __name__=="__main__":
         )
 
         if i==0:
-            pl = pv.Plotter()
-            pl.open_gif(os.path.join("anim",case_name+".gif"),fps=60)
-            pl.enable_parallel_projection()
-        if i>0:
-            pl.remove_actor(a1)
-            pl.remove_actor(a2)
-        a1 = pl.add_mesh(mesh,opacity=0.3,color='lightblue')
-        # pl.add_mesh(src)
-        # a2 = pl.add_mesh(streamlines.tube(radius=0.001),clim=(0.01,0.3))
-        a2 = pl.add_mesh(mesh2,scalars="Velocity",component=1,opacity=0.5,clim=(-50,50),cmap='jet',show_scalar_bar=False)
-        # a2 = pl.add_mesh(mesh2,scalars="Velocity",opacity=0.5,clim=(0,200),show_scalar_bar=False)
-        pl.show_axes()
-        pl.write_frame()
-    # pl.show()
+            pl = create_plotter(os.path.join("anim",case_name+".gif"))
+            pl1 = create_plotter(os.path.join("anim",case_name+"_y.gif"))
+            pl2 = create_plotter(os.path.join("anim",case_name+"_z.gif"))
+
+        mesh_props = [
+            {"opacity": 0.3, "color": "lightblue", "clim": (0.01,0.3)},
+            {"scalars": "Velocity", "opacity": 0.5, "clim": (0,70), "show_scalar_bar": False}
+        ]
+        refresh_plotter(pl,[mesh,mesh2],mesh_props,"t={:.2f}".format(i*args.dt))
+        
+        mesh_props = [
+            {"opacity": 0.3, "color": "lightblue", "clim": (0.01,0.3)},
+            {"scalars": "Velocity", "opacity": 0.5, "component": 1, "clim": (-20,20), "show_scalar_bar": False}
+        ]
+        refresh_plotter(pl1,[mesh,mesh2],mesh_props,"t={:.2f}".format(i*args.dt))
+        
+        mesh_props = [
+            {"opacity": 0.3, "color": "lightblue", "clim": (0.01,0.3)},
+            {"scalars": "Velocity", "opacity": 0.5, "component": 2, "clim": (-20,20), "show_scalar_bar": False}
+        ]
+        refresh_plotter(pl2,[mesh,mesh2],mesh_props,"t={:.2f}".format(i*args.dt))
+
     pl.close()
+    pl1.close()
+    pl2.close()
 
     optimize(os.path.join("anim",case_name+".gif"))
+    optimize(os.path.join("anim",case_name+"_y.gif"))
+    optimize(os.path.join("anim",case_name+"_z.gif"))

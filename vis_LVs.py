@@ -19,7 +19,7 @@ if __name__=="__main__":
     for phase in range(n_phases):
         for n in range(n_meshes):
             # Load mesh at phase
-            mesh_dir = "mesh_{}_less_motion".format(str(n))
+            mesh_dir = "mesh_{}".format(str(n))
             fn = os.path.join(template_dir,mesh_dir,"phase{}.vtp".format(str(phase)))
 
             # Plot

@@ -1,11 +1,12 @@
 {
   "simulation_parameters": {
     "coupled_simulation": true,
-    "number_of_time_pts": 512,
-    "external_step_size": 0.005388,
+    "number_of_time_pts": 1000,
+    "external_step_size": 0.008,
     "output_all_cycles": true,
     "output_variable_based": true,
-    "steady_initial": false
+    "steady_initial": false,
+    "cardiac_period": 0.8
   },
   "boundary_conditions": [],
   "external_solver_coupling_blocks": [
@@ -16,8 +17,8 @@
           "connected_block": "DUMMY_AV",
           "periodic": false,
           "values": {
-              "t": [0.0, 1.0],
-              "Q": [1.0, 1.0]
+              "t": [0.0,0.69],
+              "Q": [0.0,0.0]
           }
       },
       {
@@ -27,8 +28,8 @@
           "connected_block": "DUMMY_MV",
           "periodic": false,
           "values": {
-              "t": [0.0, 1.0],
-              "Q": [1.0, 1.0]
+              "t": [0.0,0.69],
+              "Q": [0.0,0.0]
           }
       }
   ],
@@ -83,7 +84,7 @@
       "zero_d_element_values": {
         "C": 16.0,
         "L": 0.0005,
-        "R_poiseuille": 0.035,
+        "R_poiseuille": 0.1625,
         "stenosis_coefficient": 0
       }
     },
@@ -125,7 +126,7 @@
     },
     {
       "vessel_id": 5,
-      "vessel_length": 10.0,
+      "vessel_length": 0.0,
       "vessel_name": "DUMMY_AV",
       "zero_d_element_type": "BloodVesselCRL",
       "zero_d_element_values": {
@@ -137,7 +138,7 @@
     },
     {
       "vessel_id": 6,
-      "vessel_length": 10.0,
+      "vessel_length": 0.0,
       "vessel_name": "DUMMY_MV",
       "zero_d_element_type": "BloodVesselCRL",
       "zero_d_element_values": {
@@ -151,41 +152,50 @@
   "chambers": [
     {
       "name": "LA",
-      "type": "PiecewiseCosineChamber",
+      "type": "LinearElastanceChamber",
       "values": {
-        "Emax": 0.2,
-        "Epass": 0.15,
-        "Vrest": 4.0,
-        "contract_start": 0.025,
-        "contract_duration": 0.061250000000000006,
-        "relax_duration": 0.18375000000000002,
-        "T_HB": 0.68967
+        "Emax": 0.12,
+        "Epass": 0.08,
+        "Vrest": 4.0
+      },
+      "activation_function": {
+        "type": "piecewise_cosine",
+        "contract_start": 0.6,
+        "relax_start": 0.704,
+        "contract_duration": 0.104,
+        "relax_duration": 0.68
       }
     },
     {
       "name": "RA",
-      "type": "PiecewiseCosineChamber",
+      "type": "LinearElastanceChamber",
       "values": {
-        "Emax": 0.06,
+        "Emax": 0.1,
         "Epass": 0.05,
-        "Vrest": 4.0,
-        "contract_start": 0.025,
-        "contract_duration": 0.061250000000000006,
-        "relax_duration": 0.18375000000000002,
-        "T_HB": 0.68967
+        "Vrest": 4.0
+      },
+      "activation_function": {
+        "type": "piecewise_cosine",
+        "contract_start": 0.56,
+        "relax_start": 0.624,
+        "contract_duration": 0.064,
+        "relax_duration": 0.64
       }
     },
     {
       "name": "RV",
-      "type": "PiecewiseCosineChamber",
+      "type": "LinearElastanceChamber",
       "values": {
         "Emax": 0.55,
-        "Epass": 0.05,
-        "Vrest": 16.0,
-        "contract_start": 0.207,
-        "contract_duration": 0.08975000000000002,
-        "relax_duration": 0.2692500000000001,
-        "T_HB": 0.68967
+        "Epass": 0.1,
+        "Vrest": 16.0
+      },
+      "activation_function": {
+        "type": "piecewise_cosine",
+        "contract_start": 0.0,
+        "relax_start": 0.272,
+        "contract_duration": 0.272,
+        "relax_duration": 0.12
       }
     }
   ],
@@ -194,8 +204,8 @@
       "type": "PiecewiseValve",
       "name": "PV",
       "params": {
-        "Rmax": 50,
-        "Rmin": 0.005,
+        "Rmax": 7500,
+        "Rmin": 0.0075,
         "upstream_block": "RV",
         "downstream_block": "ART_PUL"
       }
@@ -204,8 +214,8 @@
       "type": "PiecewiseValve",
       "name": "TV",
       "params": {
-        "Rmax": 50,
-        "Rmin": 0.005,
+        "Rmax": 7500,
+        "Rmin": 0.0075,
         "upstream_block": "RA",
         "downstream_block": "RV"
       }
@@ -214,8 +224,8 @@
       "type": "PiecewiseValve",
       "name": "AV",
       "params": {
-        "Rmax": 50,
-        "Rmin": 0.005,
+        "Rmax": 7500,
+        "Rmin": 0.0075,
         "upstream_block": "DUMMY_AV",
         "downstream_block": "ART_SYS"
       }
@@ -224,33 +234,26 @@
       "type": "PiecewiseValve",
       "name": "MV",
       "params": {
-        "Rmax": 50,
-        "Rmin": 0.005,
+        "Rmax": 7500,
+        "Rmin": 0.0075,
         "upstream_block": "LA",
         "downstream_block": "DUMMY_MV"
       }
     }
   ],
   "initial_condition": {
-    "pressure:VEN_PUL:J0": 9.28411061663363,
-    "pressure:J0:LA": 9.28411061663363,
-    "pressure:ART_PUL:J1": 14.40407877621124,
-    "pressure:J1:VEN_PUL": 14.404078776211245,
-    "pressure:VEN_SYS:J2": 4.31169480639712,
-    "pressure:J2:RA": 4.31169480639712,
-    "pressure:ART_SYS:J3": 42.12744363472372,
-    "pressure:J3:VEN_SYS": 42.12744363472372,
-    "pressure:RV:PV": 3.900489929636586,
-    "pressure:PV:ART_PUL": 16.855676692793256,
-    "pressure:RA:TV": 4.311694806394712,
-    "pressure:TV:RV": 3.900489929636586,
-    "pressure:DUMMY_AV:AV": 8.78730296259531,
-    "pressure:AV:ART_SYS": 105.73447580722068,
-    "pressure:LA:MV": 9.28411061663363,
-    "pressure:MV:DUMMY_MV": 8.78730296259531,
-    "Vc:LA": 65.89407077755752,
-    "Vc:RA": 90.23389612794237,
-    "Vc:RV": 94.00979859273171,
-    "Vc:LV": 113.63669958439236
+    "Vc:LA": 85.0,
+    "Vc:RA": 60.0,
+    "Vc:RV": 110.0,
+    "pressure:AV:ART_SYS": 110.0,
+    "pressure:ART_SYS:J3": 37.0,
+    "pressure:J3:VEN_SYS": 37.0,
+    "pressure:PV:ART_PUL": 26.0,
+    "pressure:ART_PUL:J1": 25.0,
+    "pressure:J1:VEN_PUL": 25.0,
+    "pressure:LA:MV": 20.0,
+    "pressure:DUMMY_MV:LPN_outlet": 8.0,
+    "pressure:LPN_inlet:DUMMY_AV": 8.0,
+    "pressure:DUMMY_AV:AV": 8.0
   }
 }

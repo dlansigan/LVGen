@@ -132,8 +132,8 @@ def write_motion(meshes,  start_point, intpl_num, output_dir, num_cycle, duratio
     
     poly_template = meshes[start_point]
     
-    displacements = move_mesh_cubic(meshes, start_point, intpl_num, num_cycle)
-    #displacements = move_mesh_cubic_hermite(meshes, start_point, intpl_num, num_cycle)
+    # displacements = move_mesh_cubic(meshes, start_point, intpl_num, num_cycle)
+    displacements = move_mesh_cubic_hermite(meshes, start_point, intpl_num, num_cycle)
     if debug:
         debug_dir = os.path.join(output_dir,"Debug")
         try:

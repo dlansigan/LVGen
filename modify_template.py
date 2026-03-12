@@ -4,14 +4,14 @@ import os
 
 if __name__ == "__main__":
 
-    template_path = 'data/template_meshes/LV.vtp'
+    template_path = 'template_meshes/LV.vtp'
     template_mesh = pv.read(template_path)
-    save_path = 'data/template_LV/'
+    save_path = 'template_meshes_mod'
     os.makedirs(save_path,exist_ok=True)
 
     # Define sphere for selecting points
-    radius = 0.053
-    center = (0.58,0.47,0.38)
+    radius = 0.07
+    center = (0.58,0.47,0.39)
     sph = pv.Sphere(radius=radius, center=center) # For visualization purposes
 
     # Get distances of points in template to center

@@ -116,7 +116,7 @@ if __name__=="__main__":
     # Read boundary integrated pressure for LV
     fn = os.path.join(case_path,"4-procs","B_FS_Pressure_average.txt")
     p_LV = pd.read_csv(fn,sep=" ",skiprows=9)
-    p_LV = p_LV["LV_wall"]
+    p_LV = p_LV["LV_wall"]/1333 # Convert dyn/cm^2 to mmHG
 
     # Compute volume for LV
     v_LV_fn = os.path.join(case_path,"LV_volume.npy")
@@ -191,23 +191,53 @@ if __name__=="__main__":
     R_PV = (sv0d["pressure:RV:PV"] - sv0d["pressure:PV:ART_PUL"]) / sv0d["flow:RV:PV"]
     fig4,ax4 = plt.subplots(4,1,tight_layout=True)
     ax4[0].plot(t,R_MV)
+    ax4[0].set_ylabel("MV")
     ax4[1].plot(t,R_AV)
+    ax4[1].set_ylabel("AV")
     ax4[2].plot(t,R_TV)
+    ax4[2].set_ylabel("TV")
     ax4[3].plot(t,R_PV)
+    ax4[3].set_ylabel("PV")
 
-    fig5,ax5 = plt.subplots(2,1)
-    ax5[0].plot(t,sv0d["pressure:MV:DUMMY_MV"])
-    ax5[0].plot(t,sv0d["pressure:DUMMY_MV:LPN_outlet"])
-    ax5[0].plot(t,sv0d["pressure:LPN_inlet:DUMMY_AV"])
-    ax5[0].plot(t,sv0d["pressure:DUMMY_AV:AV"])
-    ax5[1].plot(t,sv0d["flow:MV:DUMMY_MV"])
-    ax5[1].plot(t,sv0d["flow:DUMMY_MV:LPN_outlet"])
-    ax5[1].plot(t,sv0d["flow:LPN_inlet:DUMMY_AV"])
-    ax5[1].plot(t,sv0d["flow:DUMMY_AV:AV"])
+    fig5,ax5 = plt.subplots(2,2)
+    # ax5[0].plot(t,sv0d["pressure:MV:DUMMY_MV"])
+    # ax5[0].plot(t,sv0d["pressure:DUMMY_MV:LPN_outlet"])
+    # ax5[0].plot(t,sv0d["pressure:LPN_inlet:DUMMY_AV"])
+    # ax5[0].plot(t,sv0d["pressure:DUMMY_AV:AV"])
+    # ax5[1].plot(t,sv0d["flow:MV:DUMMY_MV"])
+    # ax5[1].plot(t,sv0d["flow:DUMMY_MV:LPN_outlet"])
+    # ax5[1].plot(t,sv0d["flow:LPN_inlet:DUMMY_AV"])
+    # ax5[1].plot(t,sv0d["flow:DUMMY_AV:AV"])
+
+    ax5[0][0].plot(t,sv0d["pressure:DUMMY_AV:AV"],label="P_in")
+    ax5[0][0].plot(t,sv0d["pressure:AV:ART_SYS"],label="P_out")
+    ax5[1][0].plot(t,sv0d["flow:DUMMY_AV:AV"],label="Q_in")
+    ax5[1][0].plot(t,sv0d["flow:AV:ART_SYS"],label="Q_out")
+    ax5[0][0].set_title("AV")
+    ax5[0][1].plot(t,sv0d["pressure:LA:MV"],label="P_in")
+    ax5[0][1].plot(t,sv0d["pressure:MV:DUMMY_MV"],label="P_out")
+    ax5[1][1].plot(t,sv0d["flow:LA:MV"],label="Q_in")
+    ax5[1][1].plot(t,sv0d["flow:MV:DUMMY_MV"],label="Q_out")
+    ax5[0][1].set_title("MV")
+    ax5[0][0].set_ylabel("P")
+    ax5[1][0].set_ylabel("Q")
+    ax5[0][0].legend()
+    ax5[1][0].legend()
+
+    fig6,ax6 = plt.subplots(2,1)
+    ax6[0].plot(t,sv0d["pressure:LPN_inlet:DUMMY_AV"],label="inlet")
+    ax6[0].plot(t,sv0d["pressure:DUMMY_MV:LPN_outlet"],label="outlet")
+    ax6[0].set_ylabel("p")
+    ax6[1].plot(t,sv0d["flow:LPN_inlet:DUMMY_AV"],label="inlet")
+    ax6[1].plot(t,sv0d["flow:DUMMY_MV:LPN_outlet"],label="outlet")
+    ax6[1].set_ylabel("q")
+    ax6[1].legend()
 
     if args.save_figs:
         fig1.savefig(os.path.join(case_path,"p_and_q.png"))
         fig2.savefig(os.path.join(case_path,"pv.png"))
         fig3.savefig(os.path.join(case_path,"v_vs_t.png"))
+        fig4.savefig(os.path.join(case_path,"R.png"))
+        fig5.savefig(os.path.join(case_path,"p_valves.png"))
     else:
         plt.show()
