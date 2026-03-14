@@ -43,7 +43,7 @@ if __name__=="__main__":
         # Resistance
         vessel["zero_d_element_values"]["R_poiseuille"] *= pscale*tscale/lscale**3 # mmHg-s/mL
         # Inductance
-        vessel["zero_d_element_values"]["L"] *= pscale**2/lscale**3# mmHg^2/mL
+        vessel["zero_d_element_values"]["L"] *= pscale*tscale**2/lscale**3# mmHg-s^2/mL
 
         params["vessels"][i] = vessel
 
