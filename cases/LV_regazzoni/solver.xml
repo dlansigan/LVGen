@@ -39,7 +39,7 @@
   <Add_face name="LV_outlet">
       <Face_file_path> mesh/mesh-surfaces/av.vtp </Face_file_path>
   </Add_face>
-  <Initial_pressures_file_path> mesh/init_p.vtu </Initial_pressures_file_path>
+  <!-- <Initial_pressures_file_path> mesh/init_p.vtu </Initial_pressures_file_path> -->
   <Domain> 0 </Domain>
 
 </Add_mesh>
