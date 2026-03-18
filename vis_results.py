@@ -8,7 +8,7 @@ import natsort
 import cmocean as cmo
 
 def create_plotter(gif_path):
-    pl = pv.Plotter(window_size=(600,750))
+    pl = pv.Plotter(window_size=(600,750),off_screen=True)
     pl.open_gif(gif_path,fps=15)
     pl.enable_parallel_projection()
     return pl
@@ -33,8 +33,10 @@ if __name__=="__main__":
     parser.add_argument("--dt", type=float, default=0.008)
     parser.add_argument("--last_cycles", type=int, default=0, help="If defined, plot the last number of cycles.")
     parser.add_argument("--T_HB", type=float, default=100, help="Number of time points per cycle.")
+    parser.add_argument("--save_frames", type=int, nargs="+", help="List frames to save")
     args = parser.parse_args()
 
+    save_frames = [frame-1 for frame in args.save_frames]
     case_path = args.case
     temp = case_path.split('/')
     temp = [item for item in temp if item != '']
@@ -44,6 +46,7 @@ if __name__=="__main__":
     print("Case: " + case_name)
 
     os.makedirs("anim",exist_ok=True)
+    os.makedirs(os.path.join("anim",case_name),exist_ok=True)
 
     pv.global_theme.cmap = cmo.cm.balance
 
@@ -52,6 +55,7 @@ if __name__=="__main__":
     for i in range(tstart,len(files),2):
         fn = files[i]
         print(fn)
+
         # Read mesh
         mesh = pv.read(fn)
 
@@ -72,9 +76,9 @@ if __name__=="__main__":
         )
 
         if i==tstart:
-            pl = create_plotter(os.path.join("anim",case_name+".gif"))
-            pl1 = create_plotter(os.path.join("anim",case_name+"_y.gif"))
-            pl2 = create_plotter(os.path.join("anim",case_name+"_z.gif"))
+            pl = create_plotter(os.path.join("anim",case_name,"vel.gif"))
+            pl1 = create_plotter(os.path.join("anim",case_name,"vel_y.gif"))
+            pl2 = create_plotter(os.path.join("anim",case_name,"vel_z.gif"))
 
         mesh_props = [
             {"opacity": 0.3, "color": "lightblue", "clim": (0.01,0.3)},
@@ -94,10 +98,13 @@ if __name__=="__main__":
         ]
         refresh_plotter(pl2,[mesh,mesh2],mesh_props,"t={:.2f}".format((i*args.dt)))
 
+        if i in save_frames:
+            pl.screenshot(os.path.join("anim",case_name,"frame_{}.png".format(i+1)))
+
     pl.close()
     pl1.close()
     pl2.close()
 
-    optimize(os.path.join("anim",case_name+".gif"))
-    optimize(os.path.join("anim",case_name+"_y.gif"))
-    optimize(os.path.join("anim",case_name+"_z.gif"))
+    optimize(os.path.join("anim",case_name,"vel.gif"))
+    optimize(os.path.join("anim",case_name,"vel_y.gif"))
+    optimize(os.path.join("anim",case_name,"vel_z.gif"))
