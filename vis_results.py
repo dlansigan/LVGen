@@ -8,7 +8,7 @@ import natsort
 import cmocean as cmo
 
 def create_plotter(gif_path):
-    pl = pv.Plotter()
+    pl = pv.Plotter(window_size=(600,750))
     pl.open_gif(gif_path,fps=15)
     pl.enable_parallel_projection()
     return pl
@@ -20,7 +20,7 @@ def refresh_plotter(pl,meshes,mesh_props,title):
     for mesh, props in zip(meshes,mesh_props):
         pl.add_mesh(mesh,**props)
     pl.show_axes()
-    pl.add_title(title)
+    pl.add_text(title,position="upper_edge")
     pl.write_frame()
 
     return pl
@@ -31,6 +31,8 @@ if __name__=="__main__":
     
     parser.add_argument("--case", type=str)
     parser.add_argument("--dt", type=float, default=0.008)
+    parser.add_argument("--last_cycles", type=int, default=0, help="If defined, plot the last number of cycles.")
+    parser.add_argument("--T_HB", type=float, default=100, help="Number of time points per cycle.")
     args = parser.parse_args()
 
     case_path = args.case
@@ -45,7 +47,9 @@ if __name__=="__main__":
 
     pv.global_theme.cmap = cmo.cm.balance
 
-    for i in range(0,len(files),2):
+    tstart = len(files)-args.last_cycles*args.T_HB-1
+
+    for i in range(tstart,len(files),2):
         fn = files[i]
         print(fn)
         # Read mesh
@@ -67,28 +71,28 @@ if __name__=="__main__":
             integration_direction="forward"
         )
 
-        if i==0:
+        if i==tstart:
             pl = create_plotter(os.path.join("anim",case_name+".gif"))
             pl1 = create_plotter(os.path.join("anim",case_name+"_y.gif"))
             pl2 = create_plotter(os.path.join("anim",case_name+"_z.gif"))
 
         mesh_props = [
             {"opacity": 0.3, "color": "lightblue", "clim": (0.01,0.3)},
-            {"scalars": "Velocity", "opacity": 0.5, "clim": (0,70), "show_scalar_bar": False}
+            {"scalars": "Velocity", "opacity": 0.5, "clim": (0,100), "show_scalar_bar": False}
         ]
-        refresh_plotter(pl,[mesh,mesh2],mesh_props,"t={:.2f}".format(i*args.dt))
+        refresh_plotter(pl,[mesh,mesh2],mesh_props,"t={:.2f}".format((i*args.dt)))
         
         mesh_props = [
             {"opacity": 0.3, "color": "lightblue", "clim": (0.01,0.3)},
-            {"scalars": "Velocity", "opacity": 0.5, "component": 1, "clim": (-20,20), "show_scalar_bar": False}
+            {"scalars": "Velocity", "opacity": 0.5, "component": 1, "clim": (-50,50), "show_scalar_bar": False}
         ]
-        refresh_plotter(pl1,[mesh,mesh2],mesh_props,"t={:.2f}".format(i*args.dt))
+        refresh_plotter(pl1,[mesh,mesh2],mesh_props,"t={:.2f}".format((i*args.dt)))
         
         mesh_props = [
             {"opacity": 0.3, "color": "lightblue", "clim": (0.01,0.3)},
-            {"scalars": "Velocity", "opacity": 0.5, "component": 2, "clim": (-20,20), "show_scalar_bar": False}
+            {"scalars": "Velocity", "opacity": 0.5, "component": 2, "clim": (-50,50), "show_scalar_bar": False}
         ]
-        refresh_plotter(pl2,[mesh,mesh2],mesh_props,"t={:.2f}".format(i*args.dt))
+        refresh_plotter(pl2,[mesh,mesh2],mesh_props,"t={:.2f}".format((i*args.dt)))
 
     pl.close()
     pl1.close()

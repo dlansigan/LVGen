@@ -12,6 +12,8 @@ if __name__=="__main__":
     parser = argparse.ArgumentParser()
     
     parser.add_argument("--case", type=str)
+    parser.add_argument("--last_cycles", type=int, default=0, help="If defined, plot the last number of cycles.")
+    parser.add_argument("--T_HB", type=float, default=100, help="Number of time points per cycle.")
     parser.add_argument("--calc_vol", action="store_true")
     parser.add_argument("--save_ic", action="store_true")
     parser.add_argument("--save_figs", action="store_true")
@@ -35,6 +37,7 @@ if __name__=="__main__":
 
     # Plot  circulation vs time
     t = sv0d["39"]
+    tstart = -args.last_cycles*args.T_HB
     p_pul = [
              sv0d["pressure:PV:ART_PUL"]/pscale,
              sv0d["pressure:ART_PUL:J1"]/pscale,
@@ -86,16 +89,16 @@ if __name__=="__main__":
     fig1,ax1=plt.subplots(4,2,figsize=(10,12))
     # Pulmonary/systemic
     for i in range(len(p_pul)):
-        ax1[0,0].plot(t,p_pul[i])
-        ax1[1,0].plot(t,p_sys[i])
-        ax1[0,1].plot(t,q_pul[i])
-        ax1[1,1].plot(t,q_sys[i])
+        ax1[0,0].plot(t[tstart:],p_pul[i][tstart:])
+        ax1[1,0].plot(t[tstart:],p_sys[i][tstart:])
+        ax1[0,1].plot(t[tstart:],q_pul[i][tstart:])
+        ax1[1,1].plot(t[tstart:],q_sys[i][tstart:])
     # Chambers
     for i in range(len(p_cha_left)):
-        ax1[2,0].plot(t,p_cha_left[i])
-        ax1[2,1].plot(t,q_cha_left[i])
-        ax1[3,0].plot(t,p_cha_right[i])
-        ax1[3,1].plot(t,q_cha_right[i])
+        ax1[2,0].plot(t[tstart:],p_cha_left[i][tstart:])
+        ax1[2,1].plot(t[tstart:],q_cha_left[i][tstart:])
+        ax1[3,0].plot(t[tstart:],p_cha_right[i][tstart:])
+        ax1[3,1].plot(t[tstart:],q_cha_right[i][tstart:])
     ax1[0,0].set_ylabel("Pulmonary")
     ax1[1,0].set_ylabel("Systemic")
     # ax1[1,1].set_ylim([-10,420])
@@ -151,7 +154,7 @@ if __name__=="__main__":
     fig2,ax2 = plt.subplots(2,2,tight_layout=True)
     ax2 = ax2.flatten()
     for i,name in enumerate(chambers):
-        ax2[i].plot(chambers[name][1],chambers[name][0])
+        ax2[i].plot(chambers[name][1][tstart:],chambers[name][0][tstart:])
         ax2[i].set_title(name)
         if name=="LV":
             ax2[i].set_ylim([0,150])
@@ -163,7 +166,7 @@ if __name__=="__main__":
     fig3,ax3 = plt.subplots(1,1,tight_layout=True)
     # tot_vol = 0
     for i,name in enumerate(chambers):
-        ax3.plot(t,chambers[name][1],label=name)
+        ax3.plot(t[tstart:],chambers[name][1][tstart:],label=name)
         # tot_vol+=chambers[name][1]
     # ax3.plot(t,tot_vol)
     ax3.set_xlabel("t")
@@ -195,13 +198,13 @@ if __name__=="__main__":
     R_TV = (sv0d["pressure:RA:TV"] - sv0d["pressure:TV:RV"])/pscale / sv0d["flow:RA:TV"]
     R_PV = (sv0d["pressure:RV:PV"] - sv0d["pressure:PV:ART_PUL"])/pscale / sv0d["flow:RV:PV"]
     fig4,ax4 = plt.subplots(4,1,tight_layout=True)
-    ax4[0].plot(t,R_MV)
+    ax4[0].plot(t[tstart:],R_MV[tstart:])
     ax4[0].set_ylabel("MV")
-    ax4[1].plot(t,R_AV)
+    ax4[1].plot(t[tstart:],R_AV[tstart:])
     ax4[1].set_ylabel("AV")
-    ax4[2].plot(t,R_TV)
+    ax4[2].plot(t[tstart:],R_TV[tstart:])
     ax4[2].set_ylabel("TV")
-    ax4[3].plot(t,R_PV)
+    ax4[3].plot(t[tstart:],R_PV[tstart:])
     ax4[3].set_ylabel("PV")
 
     fig5,ax5 = plt.subplots(2,2)
@@ -214,15 +217,15 @@ if __name__=="__main__":
     # ax5[1].plot(t,sv0d["flow:LPN_inlet:DUMMY_AV"])
     # ax5[1].plot(t,sv0d["flow:DUMMY_AV:AV"])
 
-    ax5[0][0].plot(t,sv0d["pressure:DUMMY_AV:AV"]/pscale,label="P_in")
-    ax5[0][0].plot(t,sv0d["pressure:AV:ART_SYS"]/pscale,label="P_out")
-    ax5[1][0].plot(t,sv0d["flow:DUMMY_AV:AV"],label="Q_in")
-    ax5[1][0].plot(t,sv0d["flow:AV:ART_SYS"],label="Q_out")
+    ax5[0][0].plot(t[tstart:],sv0d["pressure:DUMMY_AV:AV"][tstart:]/pscale,label="P_in")
+    ax5[0][0].plot(t[tstart:],sv0d["pressure:AV:ART_SYS"][tstart:]/pscale,label="P_out")
+    ax5[1][0].plot(t[tstart:],sv0d["flow:DUMMY_AV:AV"][tstart:],label="Q_in")
+    ax5[1][0].plot(t[tstart:],sv0d["flow:AV:ART_SYS"][tstart:],label="Q_out")
     ax5[0][0].set_title("AV")
-    ax5[0][1].plot(t,sv0d["pressure:LA:MV"]/pscale,label="P_in")
-    ax5[0][1].plot(t,sv0d["pressure:MV:DUMMY_MV"]/pscale,label="P_out")
-    ax5[1][1].plot(t,sv0d["flow:LA:MV"],label="Q_in")
-    ax5[1][1].plot(t,sv0d["flow:MV:DUMMY_MV"],label="Q_out")
+    ax5[0][1].plot(t[tstart:],sv0d["pressure:LA:MV"][tstart:]/pscale,label="P_in")
+    ax5[0][1].plot(t[tstart:],sv0d["pressure:MV:DUMMY_MV"][tstart:]/pscale,label="P_out")
+    ax5[1][1].plot(t[tstart:],sv0d["flow:LA:MV"][tstart:],label="Q_in")
+    ax5[1][1].plot(t[tstart:],sv0d["flow:MV:DUMMY_MV"][tstart:],label="Q_out")
     ax5[0][1].set_title("MV")
     ax5[0][0].set_ylabel("P")
     ax5[1][0].set_ylabel("Q")
@@ -230,19 +233,23 @@ if __name__=="__main__":
     ax5[1][0].legend()
 
     fig6,ax6 = plt.subplots(2,1)
-    ax6[0].plot(t,sv0d["pressure:LPN_inlet:DUMMY_AV"],label="inlet")
-    ax6[0].plot(t,sv0d["pressure:DUMMY_MV:LPN_outlet"],label="outlet")
+    ax6[0].plot(t[tstart:],sv0d["pressure:LPN_inlet:DUMMY_AV"][tstart:],label="inlet")
+    ax6[0].plot(t[tstart:],sv0d["pressure:DUMMY_MV:LPN_outlet"][tstart:],label="outlet")
     ax6[0].set_ylabel("p")
-    ax6[1].plot(t,sv0d["flow:LPN_inlet:DUMMY_AV"],label="inlet")
-    ax6[1].plot(t,sv0d["flow:DUMMY_MV:LPN_outlet"],label="outlet")
+    ax6[1].plot(t[tstart:],sv0d["flow:LPN_inlet:DUMMY_AV"][tstart:],label="inlet")
+    ax6[1].plot(t[tstart:],sv0d["flow:DUMMY_MV:LPN_outlet"][tstart:],label="outlet")
     ax6[1].set_ylabel("q")
     ax6[1].legend()
 
     if args.save_figs:
-        fig1.savefig(os.path.join(case_path,"p_and_q.png"))
-        fig2.savefig(os.path.join(case_path,"pv.png"))
-        fig3.savefig(os.path.join(case_path,"v_vs_t.png"))
-        fig4.savefig(os.path.join(case_path,"R.png"))
-        fig5.savefig(os.path.join(case_path,"p_valves.png"))
+        fig_path = "figs"
+        case = os.path.basename(case_path)
+        save_dir = os.path.join(fig_path,case)
+        os.makedirs(save_dir,exist_ok=True)
+        fig1.savefig(os.path.join(save_dir,"p_and_q.png"))
+        fig2.savefig(os.path.join(save_dir,"pv.png"))
+        fig3.savefig(os.path.join(save_dir,"v_vs_t.png"))
+        fig4.savefig(os.path.join(save_dir,"R.png"))
+        fig5.savefig(os.path.join(save_dir,"p_valves.png"))
     else:
         plt.show()
