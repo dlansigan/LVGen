@@ -14,6 +14,6 @@ if __name__=="__main__":
 
     mesh_fn = os.path.join(args.case,"mesh","mesh_complete.vtu")
     mesh = pv.read(mesh_fn)
-    mesh.point_data['Pressure'] = args.init_p*1333.22 # mmHg to dyn/cm^2
+    mesh.point_data['Pressure'] = args.init_p # dyn/cm^2
     mesh.save(os.path.join(args.case,"mesh","init_p.vtu"))
 

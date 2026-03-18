@@ -26,24 +26,27 @@ if __name__=="__main__":
     for n in range(args.n_meshes):
         mesh_dir = "mesh_{}".format(str(n))
         os.makedirs(os.path.join(save_dir,mesh_dir),exist_ok=True)
-        files = glob.glob(os.path.join(template_dir, mesh_dir, "*.vtp"))
+        files = glob.glob(os.path.join(template_dir, mesh_dir, "*.vtu"))
         for fn in files:
             mesh = pv.read(fn)
             mesh.points*=scale
-            mesh.save(os.path.join(save_dir,mesh_dir,os.path.basename(fn)))
+            new_fn, _ = os.path.splitext(os.path.basename(fn))
+            mesh.save(os.path.join(save_dir,mesh_dir,new_fn,".vtu")) # Volume mesh
+            mesh.extract_surface().save(os.path.join(save_dir,mesh_dir,new_fn,".vtp")) # Surface mesh
 
-    # Compare meshes
-    fn_gen = os.path.join(save_dir,"mesh_0_less_motion","phase0.vtp")
-    mesh_gen = pv.read(fn_gen)
-    fn_pat = "../HealthyPatientTest/HealthyPatientTest/lv_ris/biv-mesh-complete/walls_combined.vtp"
-    mesh_pat = pv.read(fn_pat)
-    # print(mesh_gen)
-    # print(mesh_pat)
-    print(mesh_gen.volume,mesh_pat.volume)
-    if args.vis:
-        pl = pv.Plotter(shape=(1,2))
-        pl.subplot(0,0)
-        pl.add_mesh(mesh_gen)
-        pl.subplot(0,1)
-        pl.add_mesh(mesh_pat)
-        pl.show()
+
+    # # Compare meshes
+    # fn_gen = os.path.join(save_dir,"mesh_0","phase0.vtp")
+    # mesh_gen = pv.read(fn_gen)
+    # fn_pat = "../HealthyPatientTest/HealthyPatientTest/lv_ris/biv-mesh-complete/walls_combined.vtp"
+    # mesh_pat = pv.read(fn_pat)
+    # # print(mesh_gen)
+    # # print(mesh_pat)
+    # print(mesh_gen.volume,mesh_pat.volume)
+    # if args.vis:
+    #     pl = pv.Plotter(shape=(1,2))
+    #     pl.subplot(0,0)
+    #     pl.add_mesh(mesh_gen)
+    #     pl.subplot(0,1)
+    #     pl.add_mesh(mesh_pat)
+    #     pl.show()

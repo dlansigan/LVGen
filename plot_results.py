@@ -93,13 +93,14 @@ if __name__=="__main__":
     # Chambers
     for i in range(len(p_cha_left)):
         ax1[2,0].plot(t,p_cha_left[i])
-        # ax1[2,0].set_ylim([-50,200])
         ax1[2,1].plot(t,q_cha_left[i])
         ax1[3,0].plot(t,p_cha_right[i])
         ax1[3,1].plot(t,q_cha_right[i])
     ax1[0,0].set_ylabel("Pulmonary")
     ax1[1,0].set_ylabel("Systemic")
+    # ax1[1,1].set_ylim([-10,420])
     ax1[2,0].set_ylabel("Left Heart")
+    # ax1[2,0].set_ylim([-10,120])
     ax1[3,0].set_ylabel("Right Heart")
     ax1[0,0].set_title("Pressure")
     ax1[0,1].set_title("Flow")
@@ -153,7 +154,7 @@ if __name__=="__main__":
         ax2[i].plot(chambers[name][1],chambers[name][0])
         ax2[i].set_title(name)
         if name=="LV":
-            ax2[i].set_ylim([0,200])
+            ax2[i].set_ylim([0,150])
     ax2[2].set_xlabel("V")
     ax2[3].set_xlabel("V")
     ax2[0].set_ylabel("P")
