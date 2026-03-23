@@ -13,7 +13,8 @@ if __name__=="__main__":
     
     parser.add_argument("--case", type=str)
     parser.add_argument("--last_cycles", type=int, default=0, help="If defined, plot the last number of cycles.")
-    parser.add_argument("--T_HB", type=float, default=100, help="Number of time points per cycle.")
+    parser.add_argument("--T_HB", type=float, default=1000, help="Number of time points per cycle.")
+    parser.add_argument("--skip", type=float, default=10, help="Number of time points per cycle.")
     parser.add_argument("--calc_vol", action="store_true")
     parser.add_argument("--save_ic", action="store_true")
     parser.add_argument("--save_figs", action="store_true")
@@ -21,6 +22,7 @@ if __name__=="__main__":
 
     case_path = args.case
     calc_LV_vol = args.calc_vol
+    skip = args.skip
 
     pscale = 1333.22
 
@@ -37,7 +39,8 @@ if __name__=="__main__":
 
     # Plot  circulation vs time
     t = sv0d["39"]
-    tstart = -args.last_cycles*args.T_HB
+    tstart = -args.last_cycles*args.T_HB # svzerod and scalar quantities are saved every step
+    tstart_3d = -args.last_cycles*args.T_HB//skip # 3d bin files may be saved every N steps
     p_pul = [
              sv0d["pressure:PV:ART_PUL"]/pscale,
              sv0d["pressure:ART_PUL:J1"]/pscale,
@@ -89,16 +92,16 @@ if __name__=="__main__":
     fig1,ax1=plt.subplots(4,2,figsize=(10,12))
     # Pulmonary/systemic
     for i in range(len(p_pul)):
-        ax1[0,0].plot(t[tstart:],p_pul[i][tstart:])
-        ax1[1,0].plot(t[tstart:],p_sys[i][tstart:])
-        ax1[0,1].plot(t[tstart:],q_pul[i][tstart:])
-        ax1[1,1].plot(t[tstart:],q_sys[i][tstart:])
+        ax1[0,0].plot(t[tstart::skip],p_pul[i][tstart::skip])
+        ax1[1,0].plot(t[tstart::skip],p_sys[i][tstart::skip])
+        ax1[0,1].plot(t[tstart::skip],q_pul[i][tstart::skip])
+        ax1[1,1].plot(t[tstart::skip],q_sys[i][tstart::skip])
     # Chambers
     for i in range(len(p_cha_left)):
-        ax1[2,0].plot(t[tstart:],p_cha_left[i][tstart:])
-        ax1[2,1].plot(t[tstart:],q_cha_left[i][tstart:])
-        ax1[3,0].plot(t[tstart:],p_cha_right[i][tstart:])
-        ax1[3,1].plot(t[tstart:],q_cha_right[i][tstart:])
+        ax1[2,0].plot(t[tstart::skip],p_cha_left[i][tstart::skip])
+        ax1[2,1].plot(t[tstart::skip],q_cha_left[i][tstart::skip])
+        ax1[3,0].plot(t[tstart::skip],p_cha_right[i][tstart::skip])
+        ax1[3,1].plot(t[tstart::skip],q_cha_right[i][tstart::skip])
     ax1[0,0].set_ylabel("Pulmonary")
     ax1[1,0].set_ylabel("Systemic")
     # ax1[1,1].set_ylim([-10,420])
@@ -154,10 +157,19 @@ if __name__=="__main__":
     fig2,ax2 = plt.subplots(2,2,tight_layout=True)
     ax2 = ax2.flatten()
     for i,name in enumerate(chambers):
-        ax2[i].plot(chambers[name][1][tstart:],chambers[name][0][tstart:])
-        ax2[i].set_title(name)
         if name=="LV":
+            v = chambers[name][1][tstart_3d:]
+            p = chambers[name][0][tstart::skip]
             ax2[i].set_ylim([0,150])
+        else:
+            v = chambers[name][1][tstart::skip]
+            p = chambers[name][0][tstart::skip]
+        ax2[i].plot(v,p)
+        ax2[i].set_title(name)
+
+        # Save for comparisons later
+        np.save(os.path.join(case_path,"{}_p.npy".format(name)),p)
+        np.save(os.path.join(case_path,"{}_v.npy".format(name)),v)
     ax2[2].set_xlabel("V")
     ax2[3].set_xlabel("V")
     ax2[0].set_ylabel("P")
@@ -166,7 +178,10 @@ if __name__=="__main__":
     fig3,ax3 = plt.subplots(1,1,tight_layout=True)
     # tot_vol = 0
     for i,name in enumerate(chambers):
-        ax3.plot(t[tstart:],chambers[name][1][tstart:],label=name)
+        if name=="LV":
+            ax3.plot(t[tstart::skip],chambers[name][1][tstart_3d::],label=name)
+        else:
+            ax3.plot(t[tstart::skip],chambers[name][1][tstart::skip],label=name)
         # tot_vol+=chambers[name][1]
     # ax3.plot(t,tot_vol)
     ax3.set_xlabel("t")
@@ -198,13 +213,13 @@ if __name__=="__main__":
     R_TV = (sv0d["pressure:RA:TV"] - sv0d["pressure:TV:RV"])/pscale / sv0d["flow:RA:TV"]
     R_PV = (sv0d["pressure:RV:PV"] - sv0d["pressure:PV:ART_PUL"])/pscale / sv0d["flow:RV:PV"]
     fig4,ax4 = plt.subplots(4,1,tight_layout=True)
-    ax4[0].plot(t[tstart:],R_MV[tstart:])
+    ax4[0].plot(t[tstart::skip],R_MV[tstart::skip])
     ax4[0].set_ylabel("MV")
-    ax4[1].plot(t[tstart:],R_AV[tstart:])
+    ax4[1].plot(t[tstart::skip],R_AV[tstart::skip])
     ax4[1].set_ylabel("AV")
-    ax4[2].plot(t[tstart:],R_TV[tstart:])
+    ax4[2].plot(t[tstart::skip],R_TV[tstart::skip])
     ax4[2].set_ylabel("TV")
-    ax4[3].plot(t[tstart:],R_PV[tstart:])
+    ax4[3].plot(t[tstart::skip],R_PV[tstart::skip])
     ax4[3].set_ylabel("PV")
 
     fig5,ax5 = plt.subplots(2,2)
@@ -217,15 +232,15 @@ if __name__=="__main__":
     # ax5[1].plot(t,sv0d["flow:LPN_inlet:DUMMY_AV"])
     # ax5[1].plot(t,sv0d["flow:DUMMY_AV:AV"])
 
-    ax5[0][0].plot(t[tstart:],sv0d["pressure:DUMMY_AV:AV"][tstart:]/pscale,label="P_in")
-    ax5[0][0].plot(t[tstart:],sv0d["pressure:AV:ART_SYS"][tstart:]/pscale,label="P_out")
-    ax5[1][0].plot(t[tstart:],sv0d["flow:DUMMY_AV:AV"][tstart:],label="Q_in")
-    ax5[1][0].plot(t[tstart:],sv0d["flow:AV:ART_SYS"][tstart:],label="Q_out")
+    ax5[0][0].plot(t[tstart::skip],sv0d["pressure:DUMMY_AV:AV"][tstart::skip]/pscale,label="P_in")
+    ax5[0][0].plot(t[tstart::skip],sv0d["pressure:AV:ART_SYS"][tstart::skip]/pscale,label="P_out")
+    ax5[1][0].plot(t[tstart::skip],sv0d["flow:DUMMY_AV:AV"][tstart::skip],label="Q_in")
+    ax5[1][0].plot(t[tstart::skip],sv0d["flow:AV:ART_SYS"][tstart::skip],label="Q_out")
     ax5[0][0].set_title("AV")
-    ax5[0][1].plot(t[tstart:],sv0d["pressure:LA:MV"][tstart:]/pscale,label="P_in")
-    ax5[0][1].plot(t[tstart:],sv0d["pressure:MV:DUMMY_MV"][tstart:]/pscale,label="P_out")
-    ax5[1][1].plot(t[tstart:],sv0d["flow:LA:MV"][tstart:],label="Q_in")
-    ax5[1][1].plot(t[tstart:],sv0d["flow:MV:DUMMY_MV"][tstart:],label="Q_out")
+    ax5[0][1].plot(t[tstart::skip],sv0d["pressure:LA:MV"][tstart::skip]/pscale,label="P_in")
+    ax5[0][1].plot(t[tstart::skip],sv0d["pressure:MV:DUMMY_MV"][tstart::skip]/pscale,label="P_out")
+    ax5[1][1].plot(t[tstart::skip],sv0d["flow:LA:MV"][tstart::skip],label="Q_in")
+    ax5[1][1].plot(t[tstart::skip],sv0d["flow:MV:DUMMY_MV"][tstart::skip],label="Q_out")
     ax5[0][1].set_title("MV")
     ax5[0][0].set_ylabel("P")
     ax5[1][0].set_ylabel("Q")
@@ -233,11 +248,11 @@ if __name__=="__main__":
     ax5[1][0].legend()
 
     fig6,ax6 = plt.subplots(2,1)
-    ax6[0].plot(t[tstart:],sv0d["pressure:LPN_inlet:DUMMY_AV"][tstart:],label="inlet")
-    ax6[0].plot(t[tstart:],sv0d["pressure:DUMMY_MV:LPN_outlet"][tstart:],label="outlet")
+    ax6[0].plot(t[tstart::skip],sv0d["pressure:LPN_inlet:DUMMY_AV"][tstart::skip],label="inlet")
+    ax6[0].plot(t[tstart::skip],sv0d["pressure:DUMMY_MV:LPN_outlet"][tstart::skip],label="outlet")
     ax6[0].set_ylabel("p")
-    ax6[1].plot(t[tstart:],sv0d["flow:LPN_inlet:DUMMY_AV"][tstart:],label="inlet")
-    ax6[1].plot(t[tstart:],sv0d["flow:DUMMY_MV:LPN_outlet"][tstart:],label="outlet")
+    ax6[1].plot(t[tstart::skip],sv0d["flow:LPN_inlet:DUMMY_AV"][tstart::skip],label="inlet")
+    ax6[1].plot(t[tstart::skip],sv0d["flow:DUMMY_MV:LPN_outlet"][tstart::skip],label="outlet")
     ax6[1].set_ylabel("q")
     ax6[1].legend()
 

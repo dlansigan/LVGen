@@ -5,9 +5,9 @@
 #         --n_meshes 10 \
 #         --scale 30
 
-case="regazzoni_fine"
+case="regazzoni_2"
 phase=9
-mesh=0
+mesh=2
 case_dir=cases/LV_$case
 
 # Clean meshes directory
@@ -20,8 +20,8 @@ simvascular --python -- sv_mesh.py \
         --case $case_dir \
         --mesh_id $mesh\
         --phase $phase \
-        --quality 1.\
-        --edge_size 0.5\
+        --quality 1.2\
+        --edge_size 1.\
         --overwrite
 python interpolate_meshes.py \
         --input_dir scaled_meshes/mesh_${mesh}/ \
