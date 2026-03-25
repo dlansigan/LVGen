@@ -2,9 +2,9 @@
 # Run simulations using workflow_sim.sh, e.g.:
 #     bash workflow_sim.sh cases/LV_regazzoni
 
-cases=("regazzoni_coarse" "regazzoni" "regazzoni_fine")
-quality=(1.6 1.2 1.0)
-edge=(1.0 1.0 0.5)
+cases=("regazzoni_coarse" "regazzoni" "regazzoni_fine" "regazzoni_finer")
+quality=(1.6 1.2 1.0 1.0)
+edge=(1.0 1.0 0.5 0.2)
 phase=9
 mesh=0
 

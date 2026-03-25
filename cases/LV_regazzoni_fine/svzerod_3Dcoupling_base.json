@@ -2,7 +2,7 @@
   "simulation_parameters": {
     "coupled_simulation": true,
     "number_of_time_pts": 10,
-    "external_step_size": 0.008,
+    "external_step_size": 0.0008,
     "output_all_cycles": true,
     "output_variable_based": true,
     "steady_initial": false,
@@ -204,7 +204,7 @@
       "type": "PiecewiseValve",
       "name": "PV",
       "params": {
-        "Rmax": 7.5,
+        "Rmax": 75,
         "Rmin": 0.0075,
         "upstream_block": "RV",
         "downstream_block": "ART_PUL"
@@ -214,7 +214,7 @@
       "type": "PiecewiseValve",
       "name": "TV",
       "params": {
-        "Rmax": 7.5,
+        "Rmax": 75,
         "Rmin": 0.0075,
         "upstream_block": "RA",
         "downstream_block": "RV"
@@ -224,7 +224,7 @@
       "type": "PiecewiseValve",
       "name": "AV",
       "params": {
-        "Rmax": 7.5,
+        "Rmax": 75,
         "Rmin": 0.0075,
         "upstream_block": "DUMMY_AV",
         "downstream_block": "ART_SYS"
@@ -234,7 +234,7 @@
       "type": "PiecewiseValve",
       "name": "MV",
       "params": {
-        "Rmax": 7.5,
+        "Rmax": 75,
         "Rmin": 0.0075,
         "upstream_block": "LA",
         "downstream_block": "DUMMY_MV"
