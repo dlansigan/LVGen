@@ -15,24 +15,34 @@ if __name__=="__main__":
     parser.add_argument("--save_dir", type=str, required=True)
     parser.add_argument("--vis", action="store_true")
     parser.add_argument("--n_meshes", type=int, default=1)
-    parser.add_argument("--scale", type=float, default=27)
+    parser.add_argument("--scale", type=float, default=None)
+    parser.add_argument("--target_vol", type=float, default=None)
     args = parser.parse_args()
 
     template_dir = args.template_dir
     save_dir = args.save_dir
     scale = args.scale
+    target_vol = args.target_vol
+    if scale and target_vol:
+        raise ValueError("Cannot use both scale and target volume. Please choose one.")
     os.makedirs(save_dir,exist_ok=True)
 
     for n in range(args.n_meshes):
         mesh_dir = "mesh_{}".format(str(n))
         os.makedirs(os.path.join(save_dir,mesh_dir),exist_ok=True)
-        files = glob.glob(os.path.join(template_dir, mesh_dir, "*.vtu"))
+        files = glob.glob(os.path.join(template_dir, mesh_dir, "*.vtp"))
+        # print(template_dir,mesh_dir, files)
         for fn in files:
             mesh = pv.read(fn)
-            mesh.points*=scale
+            if scale:
+                mesh.points*=scale
+            elif target_vol:
+                mesh.points*=(target_vol/mesh.volume)**(1/3)
             new_fn, _ = os.path.splitext(os.path.basename(fn))
-            mesh.save(os.path.join(save_dir,mesh_dir,new_fn,".vtu")) # Volume mesh
-            mesh.extract_surface().save(os.path.join(save_dir,mesh_dir,new_fn,".vtp")) # Surface mesh
+            # mesh.save(os.path.join(save_dir,mesh_dir,new_fn+".vtu")) # Volume mesh
+            mesh.save(os.path.join(save_dir,mesh_dir,new_fn+".vtp")) # Surface mesh
+            if fn==files[9]:
+                print(mesh.volume)
 
 
     # # Compare meshes

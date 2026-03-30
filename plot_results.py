@@ -13,8 +13,8 @@ if __name__=="__main__":
     
     parser.add_argument("--case", type=str)
     parser.add_argument("--last_cycles", type=int, default=0, help="If defined, plot the last number of cycles.")
-    parser.add_argument("--T_HB", type=float, default=1000, help="Number of time points per cycle.")
-    parser.add_argument("--skip", type=float, default=10, help="Number of time points per cycle.")
+    parser.add_argument("--T_HB", type=int, default=1000, help="Number of time points per cycle.")
+    parser.add_argument("--skip", type=int, default=10, help="Number of time points between dumps.")
     parser.add_argument("--calc_vol", action="store_true")
     parser.add_argument("--save_ic", action="store_true")
     parser.add_argument("--save_figs", action="store_true")
@@ -41,6 +41,7 @@ if __name__=="__main__":
     t = sv0d["39"]
     tstart = -args.last_cycles*args.T_HB # svzerod and scalar quantities are saved every step
     tstart_3d = -args.last_cycles*args.T_HB//skip # 3d bin files may be saved every N steps
+    print(len(t),tstart,tstart_3d)
     p_pul = [
              sv0d["pressure:PV:ART_PUL"]/pscale,
              sv0d["pressure:ART_PUL:J1"]/pscale,

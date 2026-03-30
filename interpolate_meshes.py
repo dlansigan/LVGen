@@ -232,6 +232,6 @@ if __name__=='__main__':
             m.GetPoints().SetData(numpy_to_vtk(points_new))
             meshes[ind] = m
 
-    write_motion(meshes,  args.phase ,args.num_interpolation, output_dir, args.num_cycle, args.duration, debug=True, scale=args.scale)
+    write_motion(meshes,  args.phase ,args.num_interpolation, output_dir, args.num_cycle, args.duration, debug=False, scale=args.scale)
     end = time.time()
     print("Time spent: ", end-start)

@@ -34,7 +34,7 @@ if __name__=="__main__":
     parser.add_argument("--case", type=str)
     parser.add_argument("--dt", type=float, default=0.008)
     parser.add_argument("--last_cycles", type=int, default=-1, help="If defined, plot the last number of cycles.")
-    parser.add_argument("--T_HB", type=float, default=100, help="Number of time points per cycle.")
+    parser.add_argument("--T_HB", type=int, default=100, help="Number of time points per cycle.")
     parser.add_argument("--save_frames", type=int, nargs="+", help="List frames to save.")
     parser.add_argument("--frame_skip", type=int, default=1, help="Number of frames to skip in animation.")
     args = parser.parse_args()
