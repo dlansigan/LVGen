@@ -10,7 +10,7 @@ python rescale_mesh.py \
         --template_dir generated_meshes \
         --save_dir scaled_meshes \
         --n_meshes 10 \
-        --scale 30
+        --target_vol 110
 
 for case in $(seq $start $end); do
         case_dir=cases/LV_$case
