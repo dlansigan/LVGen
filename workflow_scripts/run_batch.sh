@@ -5,7 +5,8 @@ start=$1
 end=$2
 
 for case in $(seq $start $end); do
-        case_dir=cases/LV_$case
+        case_dir=$STORAGE2/Active/dlavacot/LV_sims/LV_$case
+	echo $case_dir
 
-        bash workflow_sim.sh $case_dir > $case_dir/sim.log
+        bash workflow_scripts/run_sim.sh $case_dir > $case_dir/sim.log
 done
