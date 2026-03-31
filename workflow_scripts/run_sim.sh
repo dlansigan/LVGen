@@ -2,7 +2,7 @@ case=$1
 echo $case
 
 # Convert JSON
-python ../convert_json.py --case $case
+python convert_json.py --case $case
 
 # Navigate to case directory
 cd $case
