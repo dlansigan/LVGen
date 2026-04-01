@@ -42,4 +42,5 @@ for case in $(seq $start $end); do
 
         # Get param files
         cp cases/base/* $case_dir
+        sed -i "s|<SVZERODSOLVER>|${SV_ZERODSOLVER_INT_PATH}|g" $case_dir/solver.xml
 done
