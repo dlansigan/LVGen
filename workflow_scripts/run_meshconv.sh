@@ -25,7 +25,7 @@ for i in "${!cases[@]}"; do
 
         # Clean meshes directory
         rm -r $case_dir/mesh
-        mkdir $case_dir/mesh
+        mkdir -p $case_dir/mesh
 
         # Mesh one case
         simvascular --python -- sv_mesh.py \
