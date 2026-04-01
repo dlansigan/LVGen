@@ -84,7 +84,7 @@
    <svZeroDSolver_interface> 
      <Coupling_type> implicit </Coupling_type>
      <Configuration_file> svzerod_3Dcoupling.json </Configuration_file>
-     <Shared_library> ../../../svZeroDSolver/debug/src/interface/libsvzero_interface.so </Shared_library>  
+     <Shared_library> <SVZERODSOLVER>/debug/src/interface/libsvzero_interface.so </Shared_library>  
    </svZeroDSolver_interface> 
 
    <Add_BC name="LV_inlet" > 
