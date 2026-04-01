@@ -5,6 +5,19 @@ The 3D LV model is coupled to a 0D LPN of the rest of the cardiovascular system.
 Initial conditions are first obtained by running a 0D simulation of the full cardiovascular system to steady state. 
 The cases given here are set up to run for five cycles; steady state is observed after about two cycles.
 
+## Requirements
+Solvers:
+* [svMultiPhysics](https://github.com/SimVascular/svMultiPhysics/)
+* [svZeroDSolver](https://github.com/SimVascular/svZeroDSolver/)
+
+Python packages:
+* numpy
+* matplotlib
+* pyvista
+* vtk
+* pandas
+* natsort
+
 ## Workflows
 Scripts for different workflows are in `workflow_scripts`.
 * `run_batch.sh`: run a batch of simulations. Meshes must be set up beforehand (see `setup_batch.sh`). 
