@@ -28,6 +28,7 @@ if __name__=="__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--template_dir", type=str, required=True)
     parser.add_argument("--overwrite", action="store_true")
+    parser.add_argument("--calc_metrics", action="store_true")
     parser.add_argument("--case", type=str)
     parser.add_argument("--mesh_id", type=str, default=0)
     parser.add_argument("--phase", type=int, default=-1)
@@ -62,6 +63,24 @@ if __name__=="__main__":
     if not os.path.exists(vol_fn) or overwrite: # If volume mesh exists, assumes all others do, too
 
         vol_mesh, surf_mesh, face_ids = generate_mesh(fn,mesh_ops,args.quality)
+
+        if args.calc_metrics:
+            vol_filter = vtk.vtkCellQuality()
+            vol_filter.SetInputData(vol_mesh)
+            vol_filter.SetQualityMeasureToVolume()
+            vol_filter.Update()
+            vol_mesh_with_metrics = vtk.vtkUnstructuredGrid()
+            vol_mesh_with_metrics.DeepCopy(vol_filter.GetOutput())
+            vol_mesh_with_metrics.GetCellData().GetArray("CellQuality").SetName("volume")
+
+            aspect_ratio_filter = vtk.vtkCellQuality()
+            aspect_ratio_filter.SetInputData(vol_mesh_with_metrics)
+            aspect_ratio_filter.SetQualityMeasureToAspectRatio()
+            aspect_ratio_filter.Update()
+            vol_mesh_with_metrics.DeepCopy(aspect_ratio_filter.GetOutput())
+            vol_mesh_with_metrics.GetCellData().GetArray("CellQuality").SetName("aspect_ratio")
+
+            vol_mesh = vol_mesh_with_metrics
 
         # Extract faces
         for i,id in enumerate(face_ids):
