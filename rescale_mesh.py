@@ -17,6 +17,7 @@ if __name__=="__main__":
     parser.add_argument("--n_meshes", type=int, default=1)
     parser.add_argument("--scale", type=float, default=None)
     parser.add_argument("--target_vol", type=float, default=None)
+    parser.add_argument("--phase", type=int, default=0)
     args = parser.parse_args()
 
     template_dir = args.template_dir
@@ -30,17 +31,23 @@ if __name__=="__main__":
     for n in range(args.n_meshes):
         mesh_dir = "mesh_{}".format(str(n))
         os.makedirs(os.path.join(save_dir,mesh_dir),exist_ok=True)
-        files = glob.glob(os.path.join(template_dir, mesh_dir, "*.vtp"))
+        files = sorted(glob.glob(os.path.join(template_dir, mesh_dir, "*.vtp")))
         # print(template_dir,mesh_dir, files)
+        # Get reference phase volume
+        if target_vol:
+            fn = files[args.phase]
+            mesh = pv.read(fn)
+            ref_vol = mesh.volume
         for fn in files:
             mesh = pv.read(fn)
             if scale:
                 mesh.points*=scale
             elif target_vol:
-                mesh.points*=(target_vol/mesh.volume)**(1/3)
+                mesh.points*=(target_vol/ref_vol)**(1/3)
             new_fn, _ = os.path.splitext(os.path.basename(fn))
             # mesh.save(os.path.join(save_dir,mesh_dir,new_fn+".vtu")) # Volume mesh
             mesh.save(os.path.join(save_dir,mesh_dir,new_fn+".vtp")) # Surface mesh
+            # print("%s -> %s" % (fn,os.path.join(save_dir,mesh_dir,new_fn+".vtp")))
             if fn==files[9]:
                 print(mesh.volume)
 

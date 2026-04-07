@@ -10,7 +10,8 @@ phase=9
 #         --template_dir generated_meshes \
 #         --save_dir scaled_meshes \
 #         --n_meshes 100 \
-#         --target_vol 110
+#         --target_vol 110 \
+#         --phase 9
 
 for case in $(seq $start $end); do
         case_dir=cases/LV_$case
