@@ -21,7 +21,7 @@ Python packages:
 ## Workflows
 Scripts for different workflows are in `workflow_scripts`.
 * `run_batch.sh`: run a batch of simulations. Meshes must be set up beforehand (see `setup_batch.sh`). 
-    * Usage: `bash run_batch.sh $START_CASE_NUMBER $END_CASE_NUMBER`
+    * Usage: `bash run_batch.sh $CASES_DIR $START_CASE_NUMBER $END_CASE_NUMBER`
 * `run_meshconv.sh`: set up mesh convergence study meshes
 * `run_sim.sh`: run simulation for given case.
     * Usage: `bash run_sim.sh $CASE_PATH`
