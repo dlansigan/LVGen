@@ -6,17 +6,15 @@ end=$2
 phase=9
 
 # Rescale meshes first
-# python rescale_mesh.py \
-#         --template_dir generated_meshes \
-#         --save_dir scaled_meshes \
-#         --n_meshes 100 \
-#         --target_vol 110 \
-#         --phase 9
+python rescale_mesh.py \
+        --template_dir generated_meshes \
+        --save_dir scaled_meshes \
+        --n_meshes 100 \
+        --target_vol 110 \
+        --phase 9
 
 for case in $(seq $start $end); do
         case_dir=cases/LV_$case
-
-        ### GENERATE MESHES ###
 
         # Clean meshes directory
         rm -r $case_dir/mesh

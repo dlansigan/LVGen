@@ -124,14 +124,14 @@ if __name__=="__main__":
     v_RA = sv0d["Vc:RA"]
 
     # Read boundary integrated pressure for LV
-    fn = os.path.join(case_path,"4-procs","B_FS_Pressure_average.txt")
+    fn = os.path.join(case_path,"16-procs","B_FS_Pressure_average.txt")
     p_LV = pd.read_csv(fn,sep=" ",skiprows=9)
     p_LV = p_LV["LV_wall"]/pscale # Convert dyn/cm^2 to mmHG
 
     # Compute volume for LV
     v_LV_fn = os.path.join(case_path,"LV_volume.npy")
     if not os.path.exists(v_LV_fn) or calc_LV_vol:
-        results_path = os.path.join(case_path,"4-procs")
+        results_path = os.path.join(case_path,"16-procs")
         files = natsort.natsorted(glob.glob(os.path.join(results_path,"result*.vtu")))
         v_LV = []
         for fn in files:
