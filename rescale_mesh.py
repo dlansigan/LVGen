@@ -8,6 +8,7 @@ import sys
 sys.path.append("interp-src")
 import utils
 from io_utils import write_vtk_polydata, write_vtu_file
+import pickle
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser()
@@ -28,6 +29,7 @@ if __name__=="__main__":
         raise ValueError("Cannot use both scale and target volume. Please choose one.")
     os.makedirs(save_dir,exist_ok=True)
 
+    scales = []
     for n in range(args.n_meshes):
         mesh_dir = "mesh_{}".format(str(n))
         os.makedirs(os.path.join(save_dir,mesh_dir),exist_ok=True)
@@ -40,10 +42,10 @@ if __name__=="__main__":
             ref_vol = mesh.volume
         for fn in files:
             mesh = pv.read(fn)
-            if scale:
-                mesh.points*=scale
-            elif target_vol:
-                mesh.points*=(target_vol/ref_vol)**(1/3)
+            if target_vol:
+                scale=(target_vol/ref_vol)**(1/3)
+            scales.append(scale)
+            mesh.points*=scale
             new_fn, _ = os.path.splitext(os.path.basename(fn))
             # mesh.save(os.path.join(save_dir,mesh_dir,new_fn+".vtu")) # Volume mesh
             mesh.save(os.path.join(save_dir,mesh_dir,new_fn+".vtp")) # Surface mesh
@@ -51,6 +53,8 @@ if __name__=="__main__":
             if fn==files[9]:
                 print(mesh.volume)
 
+    with open(os.path.join(save_dir,"scales.pkl"), "wb") as f:
+        pickle.dump(scales, f)
 
     # # Compare meshes
     # fn_gen = os.path.join(save_dir,"mesh_0","phase0.vtp")
