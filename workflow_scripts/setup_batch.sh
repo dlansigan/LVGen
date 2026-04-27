@@ -9,7 +9,7 @@ phase=9
 python rescale_mesh.py \
         --template_dir generated_meshes \
         --save_dir scaled_meshes \
-        --n_meshes 100 \
+        --n_meshes 200 \
         --target_vol 110 \
         --phase 9
 

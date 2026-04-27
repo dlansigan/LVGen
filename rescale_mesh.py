@@ -44,7 +44,6 @@ if __name__=="__main__":
             mesh = pv.read(fn)
             if target_vol:
                 scale=(target_vol/ref_vol)**(1/3)
-            scales.append(scale)
             mesh.points*=scale
             new_fn, _ = os.path.splitext(os.path.basename(fn))
             # mesh.save(os.path.join(save_dir,mesh_dir,new_fn+".vtu")) # Volume mesh
@@ -52,6 +51,7 @@ if __name__=="__main__":
             # print("%s -> %s" % (fn,os.path.join(save_dir,mesh_dir,new_fn+".vtp")))
             if fn==files[9]:
                 print(mesh.volume)
+                scales.append(scale)
 
     with open(os.path.join(save_dir,"scales.pkl"), "wb") as f:
         pickle.dump(scales, f)
