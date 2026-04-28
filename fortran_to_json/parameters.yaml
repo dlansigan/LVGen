@@ -1,0 +1,82 @@
+# Initial conditions from initial_values.f (tZeroX array)
+# Edit these values to match your Fortran simulation output
+tZeroX:
+  p_LV_0:      7.794860      # mmHg
+  p_RV_0:      5.391475      # mmHg
+  p_LV_cap_0:  7.794860      # mmHg
+  p_RV_cap_0:  5.391475      # mmHg
+  V_LA_0:      52.197569     # mL
+  V_RA_0:      120.82212     # mL
+  V_RV_0:      120.82212     # mL — not in original Fortran tZeroX; set explicitly or remove to fall back to V_RA_0
+  p_AR_SYS_0:  57.558015     # mmHg
+  p_VEN_SYS_0: 37.934602     # mmHg
+  p_AR_PUL_0:  26.526068     # mmHg
+  p_VEN_PUL_0: 24.122322     # mmHg
+  Q_AR_SYS_0:  62.030373     # mL/s
+  Q_VEN_SYS_0: 129.672957    # mL/s
+  Q_AR_PUL_0:  69.77572      # mL/s
+  Q_VEN_PUL_0: 373.197717    # mL/s
+
+# Model parameters from parameters.f
+params:
+  # Timing
+  BPM:         84.0
+  T_HB:        0.714286      # derived from BPM (60 / BPM)
+
+  # Left atrium timing
+  time_C_LA:   0.80
+  T_C_LA:      0.15
+  T_R_LA:      0.80
+
+  # Right atrium timing
+  time_C_RA:   0.85
+  T_C_RA:      0.10
+  T_R_RA:      0.70
+
+  # Left ventricle timing
+  time_C_LV:   0.05
+  T_C_LV:      0.25
+  T_R_LV:      0.40
+
+  # Right ventricle timing
+  time_C_RV:   0.05
+  T_C_RV:      0.25
+  T_R_RV:      0.40
+
+  # Ventricular elastances
+  E_LV_act:    3.91643063
+  E_LV_pas:    0.09
+  E_RV_act:    0.42024988
+  E_RV_pas:    0.04
+
+  # Atrial elastances
+  E_LA_act:    0.0
+  E_LA_pas:    0.15
+  E_RA_act:    0.0
+  E_RA_pas:    0.05
+
+  # Rest volumes (mL)
+  V0_LA:       4.0
+  V0_RA:       4.0
+  V0_LV:       16.0
+  V0_RV:       16.0
+
+  # Systemic circulation
+  R_AR_SYS:    0.32878621
+  C_AR_SYS:    1.24526319
+  L_AR_SYS:    0.005
+  R_VEN_SYS:   0.2348528
+  C_VEN_SYS:   60.0
+  L_VEN_SYS:   0.0005
+
+  # Pulmonary circulation
+  R_AR_PUL:    0.032
+  C_AR_PUL:    10.0
+  L_AR_PUL:    0.0005
+  R_VEN_PUL:   0.035
+  C_VEN_PUL:   16.0
+  L_VEN_PUL:   0.0005
+
+  # Valve resistances
+  R_min:       0.0075
+  R_max:       7.5
